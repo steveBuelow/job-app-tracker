@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>JobTracker Pro</title>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; }
+        :root { --primary: #1a3155; --bg: #f8fafc; }
         body { font-family: sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
         .container { max-width: 800px; margin: 0 auto; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -12,6 +13,7 @@
         button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .job-card { border-left: 5px solid var(--primary); padding: 15px; margin-top: 10px; background: #fff; display: flex; justify-content: space-between; align-items: flex-start; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .btn-del { background: #ef4444; font-size: 12px; }
+        .filter-bar { margin-bottom: 15px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -33,25 +35,45 @@
             <input type="text" id="role" placeholder="Job Title">
             <input type="text" id="url" placeholder="Job URL (Link)">
             <select id="stat">
-                <option>Applied</option>
-                <option>Interviewing</option>
-                <option>Offer</option>
-                <option>Rejected</option>
+                <option value="Applied">Applied</option>
+                <option value="Interviewing">Interviewing</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
             </select>
             <textarea id="note" placeholder="Notes (salary, contact info, etc.)"></textarea>
             <button onclick="addJob()">Add to Pipeline</button>
         </div>
+        
+        <select id="filter-stat" class="filter-bar" onchange="renderJobs()">
+            <option value="All">Show All Applications</option>
+            <option value="Applied">Applied</option>
+            <option value="Interviewing">Interviewing</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+        
         <div id="job-list"></div>
     </div>
 </div>
 
 <script>
-    async function auth(endpoint) {
-    // 1. Explicitly grab the values
-    const usernameValue = document.getElementById('user').value;
-    const passwordValue = document.getElementById('pass').value;
-    const authSection = document.getElementById('auth-section');
-    const mainApp = document.getElementById('main-app');
+function esc(text) {
+    if (!text) return '';
+    const p = document.createElement('p');
+    p.textContent = text;
+    return p.innerHTML;
+}
+
+let allJobs = []; 
+
+async function auth(endpoint) {
+    const usernameValue = document.getElementById('user').value.trim();
+    const passwordValue = document.getElementById('pass').value.trim();
+
+    if (!usernameValue || !passwordValue) {
+        alert("Please enter both a username and password.");
+        return;
+    }
 
     try {
         const res = await fetch(endpoint, {
@@ -64,29 +86,34 @@
 
         if (res.ok) {
             if (endpoint === '/login') {
-                // 2. Hide login, show app
-                authSection.style.display = 'none';
-                mainApp.classList.remove('hidden');
-                console.log("Login successful, loading jobs...");
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
                 loadJobs();
             } else {
-                alert("Account created! Now you can login.");
+                alert("Account created successfully! You can now click Login.");
             }
         } else {
-            alert(data.error || "Authentication failed");
+            alert(data.error || "Authentication failed.");
         }
     } catch (err) {
-        console.error("Fetch error:", err);
+        console.error("Auth Error:", err);
+        alert("Could not connect to server.");
     }
 }
 
 async function addJob() {
+    const compInput = document.getElementById('comp');
+    const roleInput = document.getElementById('role');
+    const urlInput = document.getElementById('url');
+    const statInput = document.getElementById('stat');
+    const noteInput = document.getElementById('note');
+
     const jobData = {
-        company_name: document.getElementById('comp').value,
-        job_title: document.getElementById('role').value,
-        job_url: document.getElementById('url').value,
-        status: document.getElementById('stat').value,
-        notes: document.getElementById('note').value
+        company_name: compInput.value,
+        job_title: roleInput.value,
+        job_url: urlInput.value,
+        status: statInput.value,
+        notes: noteInput.value
     };
 
     const res = await fetch('/add-job', {
@@ -96,76 +123,69 @@ async function addJob() {
     });
 
     if (res.ok) {
-        // Clear inputs after adding
-        document.getElementById('comp').value = '';
-        document.getElementById('role').value = '';
-        loadJobs();
+        compInput.value = '';
+        roleInput.value = '';
+        urlInput.value = '';
+        noteInput.value = '';
+        loadJobs(); 
     }
 }
 
 async function loadJobs() {
-    const res = await fetch('/tasks');
-    const data = await res.json();
+    try {
+        const res = await fetch('/tasks');
+        const data = await res.json();
+        if (res.ok) {
+            allJobs = data.tasks || []; 
+            renderJobs();
+        }
+    } catch (err) {
+        console.error("Load Error:", err);
+    }
+}
+
+function renderJobs() {
+    const filterValue = document.getElementById('filter-stat').value;
     const jobListDiv = document.getElementById('job-list');
     
-    if (data.tasks) {
-        jobListDiv.innerHTML = data.tasks.map(j => `
+    const filteredJobs = allJobs.filter(j => {
+        if (filterValue === "All") return true; 
+        return j.status === filterValue; 
+    });
+
+    if (filteredJobs.length === 0) {
+        jobListDiv.innerHTML = `<p style="text-align: center; color: #64748b;">No applications found.</p>`;
+        return;
+    }
+
+    jobListDiv.innerHTML = filteredJobs.map(j => {
+        const rawUrl = j.job_url || '';
+        const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '#');
+        const linkHtml = rawUrl ? `<a href="${safeUrl}" target="_blank">Link</a>` : `<span>No Link</span>`;
+        
+        return `
             <div class="job-card">
                 <div>
-                    <strong>${j.company_name}</strong> - ${j.job_title} <br>
-                    <span style="color:var(--primary)">${j.status}</span> | 
-                    <a href="${j.job_url.startsWith('http') ? j.job_url : 'https://' + j.job_url}" target="_blank">Link</a> <br>
-                    <small>${j.notes || ''}</small>
+                    <strong>${esc(j.company_name)}</strong> - ${esc(j.job_title)} <br>
+                    <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
+                    <small>${esc(j.notes)}</small>
                 </div>
                 <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
             </div>
-        `).join('');
-    }
+        `;
+    }).join('');
 }
 
 async function delJob(id) {
     if (confirm("Remove this application?")) {
-        await fetch('/remove-job', {
+        const res = await fetch('/remove-job', {
             method: 'DELETE',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({id})
         });
-        loadJobs();
+        if (res.ok) loadJobs();
     }
 }
-
-    async function addJob() {
-        await fetch('/add-job', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                company_name: comp.value, job_title: role.value,
-                job_url: url.value, status: stat.value, notes: note.value
-            })
-        });
-        loadJobs();
-    }
-
-    async function loadJobs() {
-        const res = await fetch('/tasks');
-        const data = await res.json();
-        job_list.innerHTML = data.tasks.map(j => `
-            <div class="job-card">
-                <div>
-                    <strong>${j.company_name}</strong> - ${j.job_title} <br>
-                    <span style="color:var(--primary)">${j.status}</span> | 
-                    <a href="${j.job_url}" target="_blank">Link</a> <br>
-                    <small>${j.notes}</small>
-                </div>
-                <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
-            </div>
-        `).join('');
-    }
-
-    async function delJob(id) {
-        await fetch('/remove-job', { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id}) });
-        loadJobs();
-    }
 </script>
 </body>
 </html>
