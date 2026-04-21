@@ -37,7 +37,7 @@ A secure, full-stack web application designed to help job seekers manage their p
 
 Bash
 `git clone https://www.github.com/steveBuelow/job-app-tracker.git`
-`cd job-app-tracler`
+`cd job-app-tracker`
 * Install dependencies:
 
 Bash
