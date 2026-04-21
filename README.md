@@ -36,8 +36,8 @@ A secure, full-stack web application designed to help job seekers manage their p
 * Clone the repository:
 
 Bash
-`git clone github.com/steveBuelow/job-app-tracker.git`
-`cd jobtracker-pro`
+`git clone https://www.github.com/steveBuelow/job-app-tracker.git`
+`cd job-app-tracler`
 * Install dependencies:
 
 Bash
@@ -46,6 +46,7 @@ Bash
 
 Bash
 `python app.py`
+\ (`python3 app.py` on mac)
 * Access the app at http://127.0.0.1:5000/ in your browser.
 
 ## Future Roadmap
