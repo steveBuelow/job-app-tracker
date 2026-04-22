@@ -1,57 +1,60 @@
 # JobTracker Pro
-A secure, full-stack web application designed to help job seekers manage their pipeline, track application statuses, and maintain job links—all in one place.
+A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment.
+
+Built out of a desire to move beyond local storage and explore cloud-based data persistence (PostgreSQL) and secure backend architecture.
+
 
 ## Features
 * **Secure Authentication:** User accounts are protected using industry-standard password hashing via werkzeug.security.
 
-* **State Management:** Persistent session handling using localStorage ensures a seamless user experience across page refreshes.
+* **Cloud Persistence:** Migrated from a local-only SQLite setup to a robust PostgreSQL (Supabase) backend for 24/7 data availability.
 
-* **RESTful Architecture:** Decoupled frontend/backend communication using JSON-based API endpoints.
+* **Decoupled Architecture:** Clean separation of concerns with a RESTful Flask API and a dynamic Vanilla JavaScript frontend.
 
-* **Responsive UI:** Includes loading states, toast notifications, and dynamic filtering to manage growing application lists.
+* **Session Management:** Secure server-side session handling to ensure users only see their own application data.
 
-* **Security First:** Implemented XSS protection through client-side input escaping.
+* **Responsive Pipeline:** Includes dynamic filtering, real-time UI updates, and loading states for a seamless user experience.
+
+* **Input Sanitization:** Client-side escaping to prevent XSS and parameterized SQL queries to block SQL Injection.
 
 ## Technical Stack
-* Backend: Python / Flask
+* **Backend:** Python 3.14+, Flask
 
-* Frontend: Vanilla JavaScript (ES6+), HTML5, CSS3
+* **Frontend:** Vanilla JavaScript (ES6+), HTML5, CSS3
 
-* Database: SQLite with SQLAlchemy/DB-API
+* **Database:** PostgreSQL (via Supabase)
 
-* Deployment: Designed for cloud platforms (e.g., Render)
+* **Libraries** `psycopg2-binary` `python-dotenv` `Flask-Session`
+
+* **Deployment:** Optimized for cloud platforms like Render or Railway
 
 ## Project Structure
-* app.py: Main entry point and server configuration.
-
-* routes.py: API route definitions and session handling.
-
-* db.py: Database schema and connection management.
-
-* models.py: Data models and business logic (user/job handling).
-
-* /templates/index.html: Main frontend application.
+* `app.py`: Server configuration & entry point
+* `routes.py`: REST API endpoints & session logic
+* `models.py`: Database operations & business logic
+* `db.py`: PostgreSQL connection & server management
+* `templates/`: Frontend HTML/CSS/JS
+* `.env`: Environment variables (Ignored by Git)
 
 ## Getting Started
 * Clone the repository:
-
-Bash
 `git clone https://www.github.com/steveBuelow/job-app-tracker.git`
 `cd job-app-tracker`
+
 * Install dependencies:
-
-Bash
 `pip install flask`
-* Run the application:
 
-Bash
+* Run the application:
 `python app.py`
 \ (`python3 app.py` on mac)
-* Access the app at http://127.0.0.1:5000/ in your browser.
+
+* Access the app at `http://127.0.0.1:5000/` in your browser.
 
 ## Future Roadmap
-[ ] Implement data persistence via PostgreSQL (Supabase/Neon).
+[x] Implement data persistence via PostgreSQL (Supabase/Neon).
 
 [ ] Add visual data analytics (dashboards for application response rates).
 
 [ ] Add automated follow-up reminders based on application dates.
+
+[ ] Extract job details from uploaded job descriptions
