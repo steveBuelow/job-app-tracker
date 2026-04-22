@@ -46,6 +46,9 @@ def register_routes(app):
 
     @app.route('/remove-job', methods=['DELETE'])
     def remove_job():
+        if 'user_id' not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+        
         job_id = request.json.get('id')
         delete_job(job_id, session.get('user_id'))
         return jsonify({"success": True}), 200
