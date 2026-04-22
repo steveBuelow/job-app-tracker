@@ -1,5 +1,5 @@
 from flask import request, session, jsonify, render_template
-import sqlite3
+import psycopg2
 from db import get_db
 from models import *
 
@@ -14,7 +14,7 @@ def register_routes(app):
         try:
             create_user(data.get('username'), data.get('password'))
             return jsonify({"message": "Account created!"}), 201
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
             return jsonify({"error": "User exists"}), 409
 
     @app.route('/login', methods=['POST'])
@@ -30,8 +30,12 @@ def register_routes(app):
     def get_tasks():
         if 'user_id' not in session: return jsonify({"error": "Unauthorized"}), 401
         with get_db() as conn:
-            rows = conn.execute("SELECT * FROM applications WHERE user_id = ?", (session['user_id'],)).fetchall()
-            return jsonify({"tasks": [dict(row) for row in rows]})
+            with conn.cursor() as cur:
+                # Use %s instead of ?
+                cur.execute("SELECT * FROM applications WHERE user_id = %s", (session['user_id'],))
+                rows = cur.fetchall()
+                # Rows are already dicts because of RealDictCursor in db.py
+                return jsonify({"tasks": rows})
 
     @app.route('/add-job', methods=['POST'])
     def add_job():
