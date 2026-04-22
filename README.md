@@ -1,5 +1,5 @@
 # JobTracker Pro
-A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment.
+A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment with sorting features.
 
 Built out of a desire to move beyond local storage and explore cloud-based data persistence (PostgreSQL) and secure backend architecture.
 
