@@ -1,11 +1,7 @@
 from flask import Flask
 from dotenv import load_dotenv
 import os
-
 load_dotenv()
-
-print(f"DEBUG: DATABASE_URL is {os.environ.get('DATABASE_URL')}")
-
 from routes import register_routes
 
 app = Flask(__name__)
