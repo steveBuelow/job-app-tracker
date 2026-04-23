@@ -35,7 +35,7 @@ Built out of a desire to move beyond local storage and explore cloud-based data 
 
 * **Libraries** `psycopg2-binary` `python-dotenv` `Flask-Session`
 
-* **Deployment:** Optimized for cloud platforms like Render or Railway
+* **Deployment:** Deployed with Render
 
 ## Project Structure
 * `app.py`: Server configuration & entry point
@@ -45,19 +45,6 @@ Built out of a desire to move beyond local storage and explore cloud-based data 
 * `templates/`: Frontend HTML/CSS/JS
 * `.env`: Environment variables (Ignored by Git)
 
-## Getting Started
-* Clone the repository:
-`git clone https://www.github.com/steveBuelow/job-app-tracker.git`
-`cd job-app-tracker`
-
-* Install dependencies:
-`pip install flask`
-
-* Run the application:
-`python app.py`
-\ (`python3 app.py` on mac)
-
-* Access the app at `http://127.0.0.1:5000/` in your browser.
 
 ## Future Roadmap
 [x] Implement data persistence via PostgreSQL (Supabase/Neon).
