@@ -67,3 +67,5 @@ Built out of a desire to move beyond local storage and explore cloud-based data 
 [ ] Add automated follow-up reminders based on application dates.
 
 [ ] Extract job details from uploaded job descriptions
+
+[ ] Add buffer bar / Improve UI 
