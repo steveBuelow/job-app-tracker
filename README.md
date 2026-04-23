@@ -2,6 +2,12 @@
 
 ## [LINK FOR WEBSITE APPLICATION](https://jobtrackerpro-bmff.onrender.com)
 
+### Dashboard
+<img width="1784" height="1629" alt="dashboard-job-tracker" src="https://github.com/user-attachments/assets/52a6f60c-98ae-4afd-83e3-96c6d7775852" />
+
+### Login Screen
+<img width="877" height="275" alt="Screenshot 2026-04-22 at 8 47 23 PM" src="https://github.com/user-attachments/assets/7778c0e3-858f-4458-928f-7f5e3973c791" />
+
 A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment with sorting features.
 
 Built out of a desire to move beyond local storage and explore cloud-based data persistence (PostgreSQL) and secure backend architecture.
