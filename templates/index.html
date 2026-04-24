@@ -79,6 +79,7 @@ async function auth(endpoint) {
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',   // allows user to be logged in while refresh
             body: JSON.stringify({username: usernameValue, password: passwordValue})
         });
 
@@ -119,6 +120,7 @@ async function addJob() {
     const res = await fetch('/add-job', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
+        credentials: 'include',   // allows user to be logged in while refresh
         body: JSON.stringify(jobData)
     });
 
@@ -133,7 +135,9 @@ async function addJob() {
 
 async function loadJobs() {
     try {
-        const res = await fetch('/tasks');
+        const res = await fetch('/tasks', {
+            credentials: 'include'  // allows user to be logged in while refresh
+        });
         const data = await res.json();
         if (res.ok) {
             allJobs = data.tasks || []; 
@@ -181,6 +185,7 @@ async function delJob(id) {
         const res = await fetch('/remove-job', {
             method: 'DELETE',
             headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
             body: JSON.stringify({id})
         });
         if (res.ok) loadJobs();

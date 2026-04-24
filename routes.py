@@ -22,8 +22,9 @@ def register_routes(app):
         data = request.get_json()
         user_id = find_user(data.get('username'), data.get('password'))
         if user_id:
+            session.permanent = True
             session['user_id'] = user_id
-            return jsonify({"status": "success"}), 200
+            return jsonify({"status": "Logged in!"}), 200
         return jsonify({"error": "Invalid login"}), 401
 
     @app.route('/tasks')
@@ -39,8 +40,11 @@ def register_routes(app):
 
     @app.route('/add-job', methods=['POST'])
     def add_job():
-        if 'user_id' not in session: return jsonify({"error": "Unauthorized"}), 401
+        if 'user_id' not in session: 
+            return jsonify({"error": "Unauthorized"}), 401
+        
         d = request.get_json()
+
         create_job(d['company_name'], d['job_title'], d['status'], d['job_url'], d['notes'], session['user_id'])
         return jsonify({"success": True}), 201
 
