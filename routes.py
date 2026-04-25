@@ -1,4 +1,5 @@
 from flask import request, session, jsonify, render_template
+from datetime import datetime, timedelta
 import psycopg2
 from db import get_db
 from models import *
@@ -56,3 +57,24 @@ def register_routes(app):
         job_id = request.json.get('id')
         delete_job(job_id, session.get('user_id'))
         return jsonify({"success": True}), 200
+    
+    @app.route('/reminders')
+    def get_reminders():
+        if 'user_id' not in session:
+            return jsonify({"error": "Unauthoritzed"}), 401
+        
+        seven_days_ago = datetime.now() - timedelta(days=7)
+
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT id, company_name, job_title, created_at
+                    FROM applications
+                    WHERE user_id = %s
+                    AND status = 'Applied'
+                    AND created_at <= %s
+                """, (session['user_id'], seven_days_ago))
+                
+                reminders = cur.fetchall()
+                return jsonify({"reminders": reminders})

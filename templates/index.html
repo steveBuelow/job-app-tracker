@@ -52,9 +52,12 @@
             <option value="Rejected">Rejected</option>
         </select>
         
-        <div id="job-list"></div>
-    </div>
+        <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+    <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
+    <ul id="reminder-items"></ul>
 </div>
+
+<div id="job-list"></div>
 
 <script>
 function esc(text) {
@@ -142,6 +145,7 @@ async function loadJobs() {
         if (res.ok) {
             allJobs = data.tasks || []; 
             renderJobs();
+            loadReminders();
         }
     } catch (err) {
         console.error("Load Error:", err);
@@ -191,6 +195,38 @@ async function delJob(id) {
         if (res.ok) loadJobs();
     }
 }
+
+async function loadReminders() {
+    try {
+        const res = await fetch('/reminders', {
+            credentials: 'include'
+        });
+
+        const data = await res.json();
+        const section = document.getElementById('reminder-section');
+        const list = document.getElementById('reminder-items');
+
+        if (res.ok && data.reminders.length > 0) {
+            section.classList.remove('hidden');
+
+            list.innerHTML = data.reminders.map(r => `
+                <li>
+                    It's been a week since you applied to 
+                    <strong>${esc(r.company_name)}</strong> 
+                    for <em>${esc(r.job_title)}</em>. 
+                    Consider following up.
+                </li>
+            `).join('');
+
+        } else {
+            section.classList.add('hidden');
+        }
+
+    } catch (err) {
+        console.error("Reminder Error:", err);
+    }
+}
+
 </script>
 </body>
 </html>
