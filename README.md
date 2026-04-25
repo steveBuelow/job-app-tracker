@@ -2,7 +2,7 @@
 
 ## [LINK FOR WEBSITE APPLICATION](https://jobtrackerpro-bmff.onrender.com)
 
-A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment with sorting features.
+A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment with sorting features. The app will display a follow-up reminder for jobs created >7 days ago to remind you to follow-up.
 
 Built out of a desire to move beyond local storage and explore cloud-based data persistence (PostgreSQL) and secure backend architecture.
 
@@ -55,7 +55,7 @@ Built out of a desire to move beyond local storage and explore cloud-based data 
 
 [ ] Add visual data analytics (dashboards for application response rates).
 
-[ ] Add automated follow-up reminders based on application dates.
+[x] Add automated follow-up reminders based on application dates.
 
 [ ] Extract job details from uploaded job descriptions
 
