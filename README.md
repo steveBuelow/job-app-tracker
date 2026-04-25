@@ -6,6 +6,9 @@ A secure, full-stack web application designed for the modern job seeker. This to
 
 Built out of a desire to move beyond local storage and explore cloud-based data persistence (PostgreSQL) and secure backend architecture.
 
+### Dashboard (w follow-up reminder)
+<img width="877" height="802" alt="Screenshot 2026-04-25 at 1 40 21 PM" src="https://github.com/user-attachments/assets/d22c70fd-05d1-488a-b044-09ef0d9de6a1" />
+
 ### Dashboard
 <img width="1784" height="1629" alt="dashboard-job-tracker" src="https://github.com/user-attachments/assets/52a6f60c-98ae-4afd-83e3-96c6d7775852" />
 
