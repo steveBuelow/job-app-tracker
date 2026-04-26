@@ -31,3 +31,16 @@ def delete_job(job_id, user_id):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM applications WHERE id=%s AND user_id=%s", (job_id, user_id))
         conn.commit()
+
+def update_job(job_id, user_id, company_name, job_title, status, job_url, notes):
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE applications
+                SET company_name=%s, job_title=%s, status=%s, job_url=%s, notes=%s
+                WHERE id=%s AND user_id=%s
+                """,
+                (company_name, job_title, status, job_url, notes, job_id, user_id)
+            )
+        conn.commit()

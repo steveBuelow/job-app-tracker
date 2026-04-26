@@ -6,14 +6,40 @@
     <style>
         :root { --primary: #1a3155; --bg: #f8fafc; }
         body { font-family: sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; position: relative; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
         .job-card { border-left: 5px solid var(--primary); padding: 15px; margin-top: 10px; background: #fff; display: flex; justify-content: space-between; align-items: flex-start; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-del { background: #ef4444; font-size: 12px; }
         .filter-bar { margin-bottom: 15px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+        
+        /* Hover Effects and Buttons */
+        .btn-del { background: #ef4444; font-size: 12px; }
+        .btn-edit { background: #3b82f6; font-size: 12px; }
+        .action-buttons { display: flex; flex-direction: column; gap: 8px; opacity: 0; transition: opacity 0.2s ease-in-out; }
+        .job-card:hover .action-buttons { opacity: 1; }
+        
+        /* Edit Modal Overlay */
+        #edit-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        #edit-modal .card { width: 100%; max-width: 500px; margin: 20px; }
+
+        /* --- LOADING SPINNER STYLES --- */
+        .loader-container { display: flex; justify-content: center; align-items: center; padding: 40px; }
+        .loader { 
+            border: 4px solid #e2e8f0; 
+            border-top: 4px solid var(--primary); 
+            border-radius: 50%; 
+            width: 35px; 
+            height: 35px; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .action-buttons { opacity: 1; } /* Always show on mobile */
+        }
     </style>
 </head>
 <body>
@@ -53,11 +79,38 @@
         </select>
         
         <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
-    <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
-    <ul id="reminder-items"></ul>
-</div>
+            <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
+            <ul id="reminder-items"></ul>
+        </div>
 
-<div id="job-list"></div>
+        <div id="loading-spinner" class="loader-container hidden">
+            <div class="loader"></div>
+        </div>
+
+        <div id="job-list"></div>
+    </div>
+
+    <div id="edit-modal" class="hidden">
+        <div class="card">
+            <h2>Edit Application</h2>
+            <input type="hidden" id="edit-id">
+            <input type="text" id="edit-comp" placeholder="Company Name">
+            <input type="text" id="edit-role" placeholder="Job Title">
+            <input type="text" id="edit-url" placeholder="Job URL (Link)">
+            <select id="edit-stat">
+                <option value="Applied">Applied</option>
+                <option value="Interviewing">Interviewing</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <textarea id="edit-note" placeholder="Notes (salary, contact info, etc.)"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="saveEdit()">Save Changes</button>
+                <button onclick="closeEdit()" style="background:#64748b;">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 function esc(text) {
@@ -68,6 +121,17 @@ function esc(text) {
 }
 
 let allJobs = []; 
+
+// --- LOADER HELPERS ---
+function showLoading() {
+    document.getElementById('loading-spinner').classList.remove('hidden');
+    document.getElementById('job-list').classList.add('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loading-spinner').classList.add('hidden');
+    document.getElementById('job-list').classList.remove('hidden');
+}
 
 async function auth(endpoint) {
     const usernameValue = document.getElementById('user').value.trim();
@@ -82,7 +146,7 @@ async function auth(endpoint) {
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            credentials: 'include',   // allows user to be logged in while refresh
+            credentials: 'include',
             body: JSON.stringify({username: usernameValue, password: passwordValue})
         });
 
@@ -120,35 +184,43 @@ async function addJob() {
         notes: noteInput.value
     };
 
-    const res = await fetch('/add-job', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include',   // allows user to be logged in while refresh
-        body: JSON.stringify(jobData)
-    });
+    showLoading(); // Show spinner while adding
+    try {
+        const res = await fetch('/add-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify(jobData)
+        });
 
-    if (res.ok) {
-        compInput.value = '';
-        roleInput.value = '';
-        urlInput.value = '';
-        noteInput.value = '';
-        loadJobs(); 
+        if (res.ok) {
+            compInput.value = '';
+            roleInput.value = '';
+            urlInput.value = '';
+            noteInput.value = '';
+            await loadJobs(); 
+        }
+    } catch (err) {
+        console.error("Add Job Error:", err);
+    } finally {
+        hideLoading();
     }
 }
 
 async function loadJobs() {
+    showLoading(); 
     try {
-        const res = await fetch('/tasks', {
-            credentials: 'include'  // allows user to be logged in while refresh
-        });
+        const res = await fetch('/tasks', { credentials: 'include' });
         const data = await res.json();
         if (res.ok) {
             allJobs = data.tasks || []; 
             renderJobs();
-            loadReminders();
+            await loadReminders();
         }
     } catch (err) {
         console.error("Load Error:", err);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -178,7 +250,10 @@ function renderJobs() {
                     <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
                     <small>${esc(j.notes)}</small>
                 </div>
-                <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
+                <div class="action-buttons">
+                    <button class="btn-edit" onclick="openEdit(${j.id})">Edit</button>
+                    <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -186,29 +261,78 @@ function renderJobs() {
 
 async function delJob(id) {
     if (confirm("Remove this application?")) {
-        const res = await fetch('/remove-job', {
-            method: 'DELETE',
+        showLoading();
+        try {
+            const res = await fetch('/remove-job', {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({id})
+            });
+            if (res.ok) await loadJobs();
+        } finally {
+            hideLoading();
+        }
+    }
+}
+
+function openEdit(id) {
+    const job = allJobs.find(j => j.id === id);
+    if (!job) return;
+
+    document.getElementById('edit-id').value = job.id;
+    document.getElementById('edit-comp').value = job.company_name;
+    document.getElementById('edit-role').value = job.job_title;
+    document.getElementById('edit-url').value = job.job_url;
+    document.getElementById('edit-stat').value = job.status;
+    document.getElementById('edit-note').value = job.notes;
+
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEdit() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function saveEdit() {
+    const jobData = {
+        id: document.getElementById('edit-id').value,
+        company_name: document.getElementById('edit-comp').value,
+        job_title: document.getElementById('edit-role').value,
+        job_url: document.getElementById('edit-url').value,
+        status: document.getElementById('edit-stat').value,
+        notes: document.getElementById('edit-note').value
+    };
+
+    showLoading();
+    try {
+        const res = await fetch('/update-job', {
+            method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
-            body: JSON.stringify({id})
+            body: JSON.stringify(jobData)
         });
-        if (res.ok) loadJobs();
+
+        if (res.ok) {
+            closeEdit();
+            await loadJobs(); 
+        } else {
+            alert("Failed to update job.");
+        }
+    } finally {
+        hideLoading();
     }
 }
 
 async function loadReminders() {
     try {
-        const res = await fetch('/reminders', {
-            credentials: 'include'
-        });
-
+        const res = await fetch('/reminders', { credentials: 'include' });
         const data = await res.json();
         const section = document.getElementById('reminder-section');
         const list = document.getElementById('reminder-items');
 
-        if (res.ok && data.reminders.length > 0) {
+        if (res.ok && data.reminders && data.reminders.length > 0) {
             section.classList.remove('hidden');
-
             list.innerHTML = data.reminders.map(r => `
                 <li>
                     It's been a week since you applied to 
@@ -217,16 +341,13 @@ async function loadReminders() {
                     Consider following up.
                 </li>
             `).join('');
-
         } else {
             section.classList.add('hidden');
         }
-
     } catch (err) {
         console.error("Reminder Error:", err);
     }
 }
-
 </script>
 </body>
 </html>

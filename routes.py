@@ -78,3 +78,21 @@ def register_routes(app):
                 
                 reminders = cur.fetchall()
                 return jsonify({"reminders": reminders})
+            
+    @app.route('/update-job', methods=['PUT'])
+    def update_job_route():
+        if 'user_id' not in session:
+            return jsonify({"error":"Unauthorized"}),401
+        
+        d = request.get_json()
+
+        update_job(
+            d['id'],
+            session['user_id'],
+            d['company_name'],
+            d['job_title'],
+            d['status'],
+            d['job_url'],
+            d['notes']
+        )
+        return jsonify({"success": True}), 200
