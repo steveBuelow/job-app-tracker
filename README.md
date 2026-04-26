@@ -60,6 +60,7 @@ This project was built to simulate a real-world SaaS product while strengthening
 
 ## Project Structure
 
+```
 JobApplicationTracker/
 │
 ├── app.py              # Server configuration and entry point
@@ -71,7 +72,7 @@ JobApplicationTracker/
 │
 └── templates/
     └── index.html      # Frontend UI (HTML, CSS, and JS)
-
+```
 ---
 
 ## Development Timeline
