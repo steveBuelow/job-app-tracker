@@ -58,6 +58,20 @@ This project was built to simulate a real-world SaaS product while strengthening
 
 ---
 
+## Project Structure
+
+JobApplicationTracker/
+├── app.py              # Server configuration and entry point
+├── routes.py           # REST API endpoints and session management
+├── models.py           # Business logic and SQL CRUD operations
+├── db.py               # PostgreSQL connection and database helper
+├── requirements.txt    # Python dependencies
+├── .env                # Environment variables (API keys, DB URLs)
+└── templates/
+    └── index.html      # Frontend UI (HTML, CSS, and JS)
+
+---
+
 ## Development Timeline
 
 **April 2026**
