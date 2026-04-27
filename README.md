@@ -71,7 +71,10 @@ JobApplicationTracker/
 ├── .env                # Environment variables (API keys, DB URLs)
 │
 └── templates/
-    └── index.html      # Frontend UI (HTML, CSS, and JS)
+│    └── index.html      # Frontend UI (HTML, CSS, and JS)
+│
+└── static/
+    └── jt-logo.png      # Application Logo
 ```
 ---
 
