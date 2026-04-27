@@ -7,6 +7,11 @@
         :root { --primary: #1a3155; --bg: #f8fafc; }
         body { font-family: sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
         .container { max-width: 800px; margin: 0 auto; position: relative; }
+        
+        /* --- ADDED LOGO STYLES --- */
+        .logo-container { text-align: center; margin-bottom: 20px; }
+        .logo { max-width: 250px; height: auto; border-radius: 8px; }
+
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .hidden { display: none !important; }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
@@ -44,6 +49,11 @@
 </head>
 <body>
 <div class="container">
+    
+    <div class="logo-container">
+        <img src="jt-logo.png" alt="JT Pro Logo" class="logo">
+    </div>
+
     <div id="auth-section">
         <div class="card">
             <h2>Sign Up / Login</h2>
@@ -184,7 +194,7 @@ async function addJob() {
         notes: noteInput.value
     };
 
-    showLoading(); // Show spinner while adding
+    showLoading(); 
     try {
         const res = await fetch('/add-job', {
             method: 'POST',
