@@ -99,11 +99,11 @@ JobApplicationTracker/
 
 ## Future Improvements
 
-[x] Migrate from SQLite database to persistent PostgreSQL
-[x] Add filtering and sorting for job applications
-[ ] Implement analytics (e.g., application success rate)
-[ ] Improve UI/UX with a modern frontend framework (React)
-[ ] Add email notifications or reminders
+* [x] Migrate from SQLite database to persistent PostgreSQL
+* [x] Add filtering and sorting for job applications
+* [ ] Implement analytics (e.g., application success rate)
+* [ ] Improve UI/UX with a modern frontend framework (React)
+* [ ] Add email notifications or reminders
 
 ---
 
