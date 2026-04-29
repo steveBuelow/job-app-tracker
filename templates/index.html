@@ -98,6 +98,11 @@
             <option value="Offer">Offer</option>
             <option value="Rejected">Rejected</option>
         </select>
+
+        <select id="sort-date" class="filter-bar" onchange="renderJobs()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
         
         <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
             <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
@@ -248,12 +253,21 @@ async function loadJobs() {
 
 function renderJobs() {
     const filterValue = document.getElementById('filter-stat').value;
+    const sortValue = document.getElementById('sort-date').value;
     const jobListDiv = document.getElementById('job-list');
-    
-    const filteredJobs = allJobs.filter(j => {
-        if (filterValue === "All") return true; 
-        return j.status === filterValue; 
+
+    // Filter first
+    let filteredJobs = allJobs.filter(j => {
+        if (filterValue === "All") return true;
+        return j.status === filterValue;
     });
+
+    // Then sort
+    if (sortValue === "newest") {
+        filteredJobs.sort((a, b) => new Date(b.date_applied) - new Date(a.date_applied));
+    } else {
+        filteredJobs.sort((a, b) => new Date(a.date_applied) - new Date(b.date_applied));
+    }
 
     if (filteredJobs.length === 0) {
         jobListDiv.innerHTML = `<p style="text-align: center; color: #64748b;">No applications found.</p>`;
@@ -264,13 +278,13 @@ function renderJobs() {
         const rawUrl = j.job_url || '';
         const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '#');
         const linkHtml = rawUrl ? `<a href="${safeUrl}" target="_blank">Link</a>` : `<span>No Link</span>`;
-        
         return `
             <div class="job-card">
                 <div>
                     <strong>${esc(j.company_name)}</strong> - ${esc(j.job_title)} <br>
                     <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
-                <small> Applied: ${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>                </div>
+                    <small>Applied: ${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>
+                </div>
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="openEdit(${j.id})">Edit</button>
                     <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
