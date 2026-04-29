@@ -196,6 +196,7 @@ async function addJob() {
     const urlInput = document.getElementById('url');
     const statInput = document.getElementById('stat');
     const noteInput = document.getElementById('note');
+    const dateInput = document.getElementById('date');
 
     const jobData = {
         company_name: compInput.value,
@@ -269,8 +270,7 @@ function renderJobs() {
                 <div>
                     <strong>${esc(j.company_name)}</strong> - ${esc(j.job_title)} <br>
                     <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
-                    <small>${esc(j.notes)}</small>
-                </div>
+                <small> Applied: ${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>                </div>
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="openEdit(${j.id})">Edit</button>
                     <button class="btn-del" onclick="delJob(${j.id})">Delete</button>

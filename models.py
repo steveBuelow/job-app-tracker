@@ -21,7 +21,7 @@ def create_job(company_name, job_title, status, job_url, notes, user_id):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO applications (company_name, job_title, status, job_url, notes, user_id) VALUES (%s,%s,%s,%s,%s,%s)",
+                "INSERT INTO applications (company_name, job_title, status, job_url, notes, date_applied, user_id) VALUES (%s,%s,%s,%s,%s, NOW(),%s)",
                 (company_name, job_title, status, job_url, notes, user_id)
             )
         conn.commit()

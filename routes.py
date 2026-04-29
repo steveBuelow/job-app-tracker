@@ -69,11 +69,9 @@ def register_routes(app):
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    SELECT id, company_name, job_title, created_at
+                    SELECT id, company_name, job_title, date_applied
                     FROM applications
-                    WHERE user_id = %s
-                    AND status = 'Applied'
-                    AND created_at <= %s
+                    WHERE user_id = %s AND status = 'Applied' AND date_applied <= %s
                 """, (session['user_id'], seven_days_ago))
                 
                 reminders = cur.fetchall()
