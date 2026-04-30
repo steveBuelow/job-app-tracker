@@ -104,6 +104,21 @@
             <option value="oldest">Oldest First</option>
         </select>
         
+        <div id="analytics-section" class="card" style="display: flex; gap: 20px; flex-wrap: wrap; padding: 15px;">
+    <div style="flex: 1; text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="stat-total">0</div>
+        <div style="font-size: 12px; color: #64748b;">Total Applications</div>
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #3b82f6;" id="stat-response">0%</div>
+        <div style="font-size: 12px; color: #64748b;">Response Rate</div>
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <div style="font-size: 28px; font-weight: bold; color: #10b981;" id="stat-weekly">0</div>
+        <div style="font-size: 12px; color: #64748b;">Apps This Week</div>
+    </div>
+</div>
+
         <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
             <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
             <ul id="reminder-items"></ul>
@@ -139,6 +154,20 @@
 </div>
 
 <script>
+function renderAnalytics(jobs) {
+    const total = jobs.length;
+
+    const interviews = jobs.filter(j => j.status === "Interviewing" || j.status === "Offer").length;
+    const responseRate = total === 0 ? 0 : ((interviews / total) * 100).toFixed(1);
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const appsThisWeek = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= oneWeekAgo).length;
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-response').textContent = responseRate + '%';
+    document.getElementById('stat-weekly').textContent = appsThisWeek;
+}
 function esc(text) {
     if (!text) return '';
     const p = document.createElement('p');
@@ -268,7 +297,7 @@ function renderJobs() {
     } else {
         filteredJobs.sort((a, b) => new Date(a.date_applied) - new Date(b.date_applied));
     }
-
+    renderAnalytics(allJobs); // use allJobs so stats reflect everything, not just filtered view
     if (filteredJobs.length === 0) {
         jobListDiv.innerHTML = `<p style="text-align: center; color: #64748b;">No applications found.</p>`;
         return;
