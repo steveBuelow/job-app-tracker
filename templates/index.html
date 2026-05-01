@@ -9,9 +9,9 @@
         .container { max-width: 800px; margin: 0 auto; position: relative; }
         
         logo-container { 
-            background-color: #000; /* This matches your logo background */
+            background-color: #000;
             padding: 15px; 
-            border-radius: 10px; /* Matches the curve of your other cards */
+            border-radius: 10px;
             margin-bottom: 20px; 
             text-align: center;
             display: flex;
@@ -34,9 +34,24 @@
         /* Hover Effects and Buttons */
         .btn-del { background: #ef4444; font-size: 12px; }
         .btn-edit { background: #3b82f6; font-size: 12px; }
+        .btn-followup { background: #10b981; font-size: 12px; }
         .action-buttons { display: flex; flex-direction: column; gap: 8px; opacity: 0; transition: opacity 0.2s ease-in-out; }
         .job-card:hover .action-buttons { opacity: 1; }
         
+        /* Follow-up output area */
+        .followup-output {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #334155;
+            white-space: pre-wrap;
+            background: #f1f5f9;
+            border-radius: 5px;
+            padding: 10px;
+            border-left: 3px solid #10b981;
+            display: none;
+        }
+        .followup-output.visible { display: block; }
+
         /* Edit Modal Overlay */
         #edit-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
         #edit-modal .card { width: 100%; max-width: 500px; margin: 20px; }
@@ -54,7 +69,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
-            .action-buttons { opacity: 1; } /* Always show on mobile */
+            .action-buttons { opacity: 1; }
         }
     </style>
 </head>
@@ -105,19 +120,19 @@
         </select>
         
         <div id="analytics-section" class="card" style="display: flex; gap: 20px; flex-wrap: wrap; padding: 15px;">
-    <div style="flex: 1; text-align: center;">
-        <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="stat-total">0</div>
-        <div style="font-size: 12px; color: #64748b;">Total Applications</div>
-    </div>
-    <div style="flex: 1; text-align: center;">
-        <div style="font-size: 28px; font-weight: bold; color: #3b82f6;" id="stat-response">0%</div>
-        <div style="font-size: 12px; color: #64748b;">Response Rate</div>
-    </div>
-    <div style="flex: 1; text-align: center;">
-        <div style="font-size: 28px; font-weight: bold; color: #10b981;" id="stat-weekly">0</div>
-        <div style="font-size: 12px; color: #64748b;">Apps This Week</div>
-    </div>
-</div>
+            <div style="flex: 1; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="stat-total">0</div>
+                <div style="font-size: 12px; color: #64748b;">Total Applications</div>
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: var(--primary)" id="stat-response">0%</div>
+                <div style="font-size: 12px; color: #64748b;">Response Rate</div>
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: var(--primary)" id="stat-weekly">0</div>
+                <div style="font-size: 12px; color: #64748b;">Apps This Week</div>
+            </div>
+        </div>
 
         <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
             <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
@@ -156,18 +171,16 @@
 <script>
 function renderAnalytics(jobs) {
     const total = jobs.length;
-
     const interviews = jobs.filter(j => j.status === "Interviewing" || j.status === "Offer").length;
     const responseRate = total === 0 ? 0 : ((interviews / total) * 100).toFixed(1);
-
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const appsThisWeek = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= oneWeekAgo).length;
-
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-response').textContent = responseRate + '%';
     document.getElementById('stat-weekly').textContent = appsThisWeek;
 }
+
 function esc(text) {
     if (!text) return '';
     const p = document.createElement('p');
@@ -175,9 +188,8 @@ function esc(text) {
     return p.innerHTML;
 }
 
-let allJobs = []; 
+let allJobs = [];
 
-// --- LOADER HELPERS ---
 function showLoading() {
     document.getElementById('loading-spinner').classList.remove('hidden');
     document.getElementById('job-list').classList.add('hidden');
@@ -191,12 +203,10 @@ function hideLoading() {
 async function auth(endpoint) {
     const usernameValue = document.getElementById('user').value.trim();
     const passwordValue = document.getElementById('pass').value.trim();
-
     if (!usernameValue || !passwordValue) {
         alert("Please enter both a username and password.");
         return;
     }
-
     try {
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -204,9 +214,7 @@ async function auth(endpoint) {
             credentials: 'include',
             body: JSON.stringify({username: usernameValue, password: passwordValue})
         });
-
         const data = await res.json();
-
         if (res.ok) {
             if (endpoint === '/login') {
                 document.getElementById('auth-section').classList.add('hidden');
@@ -230,8 +238,6 @@ async function addJob() {
     const urlInput = document.getElementById('url');
     const statInput = document.getElementById('stat');
     const noteInput = document.getElementById('note');
-    const dateInput = document.getElementById('date');
-
     const jobData = {
         company_name: compInput.value,
         job_title: roleInput.value,
@@ -239,8 +245,7 @@ async function addJob() {
         status: statInput.value,
         notes: noteInput.value
     };
-
-    showLoading(); 
+    showLoading();
     try {
         const res = await fetch('/add-job', {
             method: 'POST',
@@ -248,13 +253,12 @@ async function addJob() {
             credentials: 'include',
             body: JSON.stringify(jobData)
         });
-
         if (res.ok) {
             compInput.value = '';
             roleInput.value = '';
             urlInput.value = '';
             noteInput.value = '';
-            await loadJobs(); 
+            await loadJobs();
         }
     } catch (err) {
         console.error("Add Job Error:", err);
@@ -264,12 +268,12 @@ async function addJob() {
 }
 
 async function loadJobs() {
-    showLoading(); 
+    showLoading();
     try {
         const res = await fetch('/tasks', { credentials: 'include' });
         const data = await res.json();
         if (res.ok) {
-            allJobs = data.tasks || []; 
+            allJobs = data.tasks || [];
             renderJobs();
             await loadReminders();
         }
@@ -285,19 +289,19 @@ function renderJobs() {
     const sortValue = document.getElementById('sort-date').value;
     const jobListDiv = document.getElementById('job-list');
 
-    // Filter first
     let filteredJobs = allJobs.filter(j => {
         if (filterValue === "All") return true;
         return j.status === filterValue;
     });
 
-    // Then sort
     if (sortValue === "newest") {
         filteredJobs.sort((a, b) => new Date(b.date_applied) - new Date(a.date_applied));
     } else {
         filteredJobs.sort((a, b) => new Date(a.date_applied) - new Date(b.date_applied));
     }
-    renderAnalytics(allJobs); // use allJobs so stats reflect everything, not just filtered view
+
+    renderAnalytics(allJobs);
+
     if (filteredJobs.length === 0) {
         jobListDiv.innerHTML = `<p style="text-align: center; color: #64748b;">No applications found.</p>`;
         return;
@@ -309,18 +313,43 @@ function renderJobs() {
         const linkHtml = rawUrl ? `<a href="${safeUrl}" target="_blank">Link</a>` : `<span>No Link</span>`;
         return `
             <div class="job-card">
-                <div>
+                <div style="flex: 1;">
                     <strong>${esc(j.company_name)}</strong> - ${esc(j.job_title)} <br>
                     <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
-                    <small>Applied: ${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>
+                    <small><img src="/static/date-71.png" alt="Date Applied" class="icon" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;">${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>
+                    <div id="followup-output-${j.id}" class="followup-output"></div>
                 </div>
                 <div class="action-buttons">
+                    <button class="btn-followup" onclick="generateFollowUp(${j.id})">Follow-Up Email</button>
                     <button class="btn-edit" onclick="openEdit(${j.id})">Edit</button>
                     <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+async function generateFollowUp(id) {
+    const job = allJobs.find(j => j.id === id);
+    if (!job) return;
+
+    const outputEl = document.getElementById(`followup-output-${id}`);
+    outputEl.textContent = "Generating email...";
+    outputEl.classList.add('visible');
+
+    try {
+        const res = await fetch('/generate-followup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ company: job.company_name, role: job.job_title })
+        });
+        const data = await res.json();
+        outputEl.textContent = data.email || "Could not generate email.";
+    } catch (err) {
+        outputEl.textContent = "Error connecting to server.";
+        console.error("Follow-Up Error:", err);
+    }
 }
 
 async function delJob(id) {
@@ -343,14 +372,12 @@ async function delJob(id) {
 function openEdit(id) {
     const job = allJobs.find(j => j.id === id);
     if (!job) return;
-
     document.getElementById('edit-id').value = job.id;
     document.getElementById('edit-comp').value = job.company_name;
     document.getElementById('edit-role').value = job.job_title;
     document.getElementById('edit-url').value = job.job_url;
     document.getElementById('edit-stat').value = job.status;
     document.getElementById('edit-note').value = job.notes;
-
     document.getElementById('edit-modal').classList.remove('hidden');
 }
 
@@ -367,7 +394,6 @@ async function saveEdit() {
         status: document.getElementById('edit-stat').value,
         notes: document.getElementById('edit-note').value
     };
-
     showLoading();
     try {
         const res = await fetch('/update-job', {
@@ -376,10 +402,9 @@ async function saveEdit() {
             credentials: 'include',
             body: JSON.stringify(jobData)
         });
-
         if (res.ok) {
             closeEdit();
-            await loadJobs(); 
+            await loadJobs();
         } else {
             alert("Failed to update job.");
         }
@@ -394,7 +419,6 @@ async function loadReminders() {
         const data = await res.json();
         const section = document.getElementById('reminder-section');
         const list = document.getElementById('reminder-items');
-
         if (res.ok && data.reminders && data.reminders.length > 0) {
             section.classList.remove('hidden');
             list.innerHTML = data.reminders.map(r => `

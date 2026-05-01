@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import psycopg2
 from db import get_db
 from models import *
+import random
 
 def register_routes(app):
     @app.route('/')
@@ -94,3 +95,21 @@ def register_routes(app):
             d['notes']
         )
         return jsonify({"success": True}), 200
+    
+    @app.route("/generate-followup", methods=["POST"])
+    def generate_followup():
+        data = request.json
+        company = data.get("company")
+        role = data.get("role")
+
+        templates = [
+            f"Hi {company} team,\n\nI wanted to follow up on my application for the {role} position. I remain very interested in the opportunity and would appreciate any updates when available.\n\nBest regards,",
+        
+            f"Hello {company},\n\nI hope you're doing well. I'm following up regarding my application for the {role} role. I'm very excited about the opportunity and wanted to reiterate my interest.\n\nThank you for your time,\n",
+        
+            f"Dear {company} Hiring Team,\n\nI’m writing to follow up on my application for the {role} position. I’m very enthusiastic about the opportunity and would love to contribute to your team.\n\nSincerely,"
+        ]
+
+        return jsonify({
+            "email": random.choice(templates)
+        })
