@@ -3,439 +3,718 @@
 <head>
     <meta charset="UTF-8">
     <title>JobTracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a3155; --bg: #f8fafc; }
-        body { font-family: sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
-        .container { max-width: 800px; margin: 0 auto; position: relative; }
-        
-        logo-container { 
-            background-color: #000;
-            padding: 15px; 
-            border-radius: 10px;
-            margin-bottom: 20px; 
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .logo { 
-            max-width: 200px; 
-            height: auto; 
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #21262d;
+            --border: #30363d;
+            --primary: #2f81f7;
+            --primary-dim: rgba(47,129,247,0.12);
+            --green: #3fb950;
+            --green-dim: rgba(63,185,80,0.12);
+            --yellow: #d29922;
+            --yellow-dim: rgba(210,153,34,0.12);
+            --red: #f85149;
+            --red-dim: rgba(248,81,73,0.12);
+            --text: #e6edf3;
+            --text-muted: #7d8590;
+            --text-subtle: #484f58;
+            --radius: 10px;
+            --shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 20px 60px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { height: 40px; }
+        .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-title span { color: var(--primary); }
+
+        /* CARD */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 16px;
+        }
+
+        /* INPUTS */
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 14px;
+            margin: 5px 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.15s;
+            outline: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-dim);
+        }
+        select option { background: var(--surface2); }
+        textarea { resize: vertical; min-height: 70px; }
+        ::placeholder { color: var(--text-subtle); }
+
+        /* BUTTONS */
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        button:hover { opacity: 0.85; }
+        button:active { transform: scale(0.98); }
+        .btn-muted { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(248,81,73,0.3);  font-size: 12px; padding: 6px 12px; }
+        .btn-blue  { background: var(--primary-dim); color: var(--primary); border: 1px solid rgba(47,129,247,0.3); font-size: 12px; padding: 6px 12px; }
+        .btn-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(63,185,80,0.3);  font-size: 12px; padding: 6px 12px; }
+
         .hidden { display: none !important; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        
-        .job-card { border-left: 5px solid var(--primary); padding: 15px; margin-top: 10px; background: #fff; display: flex; justify-content: space-between; align-items: flex-start; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .filter-bar { margin-bottom: 15px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
-        
-        /* Hover Effects and Buttons */
-        .btn-del { background: #ef4444; font-size: 12px; }
-        .btn-edit { background: #3b82f6; font-size: 12px; }
-        .btn-followup { background: #10b981; font-size: 12px; }
-        .action-buttons { display: flex; flex-direction: column; gap: 8px; opacity: 0; transition: opacity 0.2s ease-in-out; }
-        .job-card:hover .action-buttons { opacity: 1; }
-        
-        /* Follow-up output area */
-        .followup-output {
-            margin-top: 10px;
+
+        /* AUTH */
+        #auth-section { max-width: 420px; margin: 80px auto 0; }
+        #auth-section .card { padding: 32px; }
+        .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        .auth-buttons { display: flex; gap: 10px; margin-top: 8px; }
+
+        /* ANALYTICS */
+        .analytics-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'DM Mono', monospace;
+            line-height: 1;
+        }
+        .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* VIEW TOGGLE */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .view-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 7px 16px;
+            border-radius: 6px;
             font-size: 13px;
-            color: #334155;
+            font-weight: 500;
+        }
+        .view-btn.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+        .filters-row { display: flex; gap: 8px; flex: 1; justify-content: flex-end; flex-wrap: wrap; }
+        .filters-row select { width: auto; margin: 0; min-width: 150px; flex: 1; }
+
+        /* LIST CARDS */
+        .job-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .job-card:hover { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary-dim); }
+        .job-card-company { font-weight: 600; font-size: 15px; }
+        .job-card-role { color: var(--text-muted); font-size: 13px; margin-top: 3px; }
+        .job-card-meta { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+
+        .status-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .badge-Applied      { background: var(--primary-dim); color: var(--primary); }
+        .badge-Interviewing { background: var(--yellow-dim);  color: var(--yellow); }
+        .badge-Offer        { background: var(--green-dim);   color: var(--green); }
+        .badge-Rejected     { background: var(--red-dim);     color: var(--red); }
+
+        .job-card-date  { font-size: 12px; color: var(--text-subtle); font-family: 'DM Mono', monospace; }
+        .job-card-notes { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+        .job-card-link  { font-size: 12px; color: var(--primary); text-decoration: none; }
+        .job-card-link:hover { text-decoration: underline; }
+
+        .action-buttons { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
+        .job-card:hover .action-buttons { opacity: 1; }
+
+        .followup-output {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text);
             white-space: pre-wrap;
-            background: #f1f5f9;
-            border-radius: 5px;
-            padding: 10px;
-            border-left: 3px solid #10b981;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 12px 14px;
+            border-left: 3px solid var(--green);
+            font-family: 'DM Mono', monospace;
+            line-height: 1.6;
             display: none;
         }
         .followup-output.visible { display: block; }
 
-        /* Edit Modal Overlay */
-        #edit-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        #edit-modal .card { width: 100%; max-width: 500px; margin: 20px; }
-
-        /* --- LOADING SPINNER STYLES --- */
-        .loader-container { display: flex; justify-content: center; align-items: center; padding: 40px; }
-        .loader { 
-            border: 4px solid #e2e8f0; 
-            border-top: 4px solid var(--primary); 
-            border-radius: 50%; 
-            width: 35px; 
-            height: 35px; 
-            animation: spin 1s linear infinite; 
+        /* REMINDERS */
+        .reminder-banner {
+            background: var(--yellow-dim);
+            border: 1px solid rgba(210,153,34,0.3);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 20px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .reminder-banner h3 { font-size: 13px; font-weight: 600; color: var(--yellow); margin-bottom: 8px; }
+        .reminder-banner li { font-size: 13px; color: var(--text-muted); margin-left: 16px; margin-top: 4px; }
+        .reminder-banner strong { color: var(--text); }
 
-        @media (max-width: 768px) {
-            .action-buttons { opacity: 1; }
+        /* LOADER */
+        .loader-container { display: flex; justify-content: center; padding: 50px; }
+        .loader { border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* KANBAN */
+        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; }
+
+        .kanban-col {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            min-height: 220px;
+            transition: box-shadow 0.2s, border-color 0.2s;
         }
+        .kanban-col.drag-over { box-shadow: 0 0 0 2px var(--primary); border-color: var(--primary); }
+
+        .kanban-col-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .col-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+        .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .col-count { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+        .col-Applied     .col-label { color: var(--primary); }
+        .col-Applied     .col-dot   { background: var(--primary); }
+        .col-Interviewing .col-label { color: var(--yellow); }
+        .col-Interviewing .col-dot  { background: var(--yellow); }
+        .col-Offer       .col-label { color: var(--green); }
+        .col-Offer       .col-dot   { background: var(--green); }
+        .col-Rejected    .col-label { color: var(--red); }
+        .col-Rejected    .col-dot   { background: var(--red); }
+
+        .kanban-cards { padding: 10px; min-height: 80px; }
+
+        .kanban-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 13px 14px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+            user-select: none;
+        }
+        .kanban-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: var(--text-subtle); }
+        .kanban-card.dragging { opacity: 0.35; cursor: grabbing; }
+        .kanban-card-company { font-weight: 600; font-size: 13px; }
+        .kanban-card-role    { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .kanban-card-date    { font-size: 11px; color: var(--text-subtle); margin-top: 10px; font-family: 'DM Mono', monospace; }
+        .kanban-empty        { font-size: 12px; color: var(--text-subtle); padding: 16px; text-align: center; }
+
+        /* MODAL */
+        #edit-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(6px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 200;
+        }
+        #edit-modal .card { width: 100%; max-width: 500px; margin: 20px; animation: slideUp 0.2s ease; }
+        #edit-modal .card-label { font-size: 16px; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 700; }
+        @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .action-buttons { opacity: 1; } }
+        @media (max-width: 500px) { .kanban-board { grid-template-columns: 1fr; } .analytics-bar { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
 <div class="container">
-    
-    <div class="logo-container">
-        <img src="/static/jt-logo.png" alt="JT Pro Logo" class="logo">
+
+    <!-- HEADER -->
+    <div class="header">
+        <img src="/static/jt-logo.png" alt="JobTracker Pro" class="logo" onerror="this.style.display='none'">
+        <div class="header-title">Job<span>Tracker</span> Pro</div>
     </div>
 
+    <!-- AUTH -->
     <div id="auth-section">
         <div class="card">
-            <h2>Sign Up / Login</h2>
+            <div class="auth-title">Welcome back</div>
             <input type="text" id="user" placeholder="Username">
             <input type="password" id="pass" placeholder="Password">
-            <button onclick="auth('/signup')">Create Account</button>
-            <button onclick="auth('/login')" style="background:#64748b">Login</button>
+            <div class="auth-buttons">
+                <button onclick="auth('/signup')" class="btn-muted" style="flex:1;">Create Account</button>
+                <button onclick="auth('/login')" style="flex:1;">Login →</button>
+            </div>
         </div>
     </div>
 
+    <!-- MAIN APP -->
     <div id="main-app" class="hidden">
+
+        <!-- ADD JOB -->
         <div class="card">
-            <h2>Add Application</h2>
-            <input type="text" id="comp" placeholder="Company Name">
-            <input type="text" id="role" placeholder="Job Title">
-            <input type="text" id="url" placeholder="Job URL (Link)">
-            <select id="stat">
-                <option value="Applied">Applied</option>
-                <option value="Interviewing">Interviewing</option>
-                <option value="Offer">Offer</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            <textarea id="note" placeholder="Notes (salary, contact info, etc.)"></textarea>
-            <button onclick="addJob()">Add to Pipeline</button>
-        </div>
-        
-        <select id="filter-stat" class="filter-bar" onchange="renderJobs()">
-            <option value="All">Show All Applications</option>
-            <option value="Applied">Applied</option>
-            <option value="Interviewing">Interviewing</option>
-            <option value="Offer">Offer</option>
-            <option value="Rejected">Rejected</option>
-        </select>
-
-        <select id="sort-date" class="filter-bar" onchange="renderJobs()">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-        </select>
-        
-        <div id="analytics-section" class="card" style="display: flex; gap: 20px; flex-wrap: wrap; padding: 15px;">
-            <div style="flex: 1; text-align: center;">
-                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="stat-total">0</div>
-                <div style="font-size: 12px; color: #64748b;">Total Applications</div>
+            <div class="card-label">New Application</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <input type="text" id="comp" placeholder="Company Name">
+                <input type="text" id="role" placeholder="Job Title">
+                <input type="text" id="url"  placeholder="Job URL">
+                <select id="stat">
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
             </div>
-            <div style="flex: 1; text-align: center;">
-                <div style="font-size: 28px; font-weight: bold; color: var(--primary)" id="stat-response">0%</div>
-                <div style="font-size: 12px; color: #64748b;">Response Rate</div>
-            </div>
-            <div style="flex: 1; text-align: center;">
-                <div style="font-size: 28px; font-weight: bold; color: var(--primary)" id="stat-weekly">0</div>
-                <div style="font-size: 12px; color: #64748b;">Apps This Week</div>
-            </div>
+            <textarea id="note" placeholder="Notes (salary, contact, etc.)" style="margin-top:8px;"></textarea>
+            <button onclick="addJob()" style="margin-top:12px;">+ Add to Pipeline</button>
         </div>
 
-        <div id="reminder-section" class="hidden" style="background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
-            <h3 style="margin-top:0; color: #92400e;">⚠️ Follow-up Reminders</h3>
+        <!-- ANALYTICS -->
+        <div class="analytics-bar">
+            <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Applications</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-response">0%</div><div class="stat-label">Response Rate</div></div>
+            <div class="stat-box"><div class="stat-num" id="stat-weekly">0</div><div class="stat-label">This Week</div></div>
+        </div>
+
+        <!-- REMINDERS -->
+        <div id="reminder-section" class="reminder-banner hidden">
+            <h3>⚠ Follow-up Reminders</h3>
             <ul id="reminder-items"></ul>
         </div>
 
-        <div id="loading-spinner" class="loader-container hidden">
-            <div class="loader"></div>
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="view-toggle">
+                <button class="view-btn active" id="btn-list"   onclick="switchView('list')">☰ List</button>
+                <button class="view-btn"         id="btn-kanban" onclick="switchView('kanban')">⊞ Board</button>
+            </div>
+            <div class="filters-row" id="list-filters">
+                <select id="filter-stat" onchange="renderJobs()">
+                    <option value="All">All Statuses</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                <select id="sort-date" onchange="renderJobs()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
         </div>
 
+        <!-- LOADER -->
+        <div id="loading-spinner" class="loader-container hidden"><div class="loader"></div></div>
+
+        <!-- LIST VIEW -->
         <div id="job-list"></div>
+
+        <!-- KANBAN VIEW -->
+        <div id="kanban-view" class="hidden">
+            <div class="kanban-board">
+                <div class="kanban-col col-Applied" id="col-Applied" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'Applied')">
+                    <div class="kanban-col-header"><div class="col-label"><span class="col-dot"></span>Applied</div><span class="col-count" id="count-Applied">0</span></div>
+                    <div class="kanban-cards" id="cards-Applied"></div>
+                </div>
+                <div class="kanban-col col-Interviewing" id="col-Interviewing" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'Interviewing')">
+                    <div class="kanban-col-header"><div class="col-label"><span class="col-dot"></span>Interviewing</div><span class="col-count" id="count-Interviewing">0</span></div>
+                    <div class="kanban-cards" id="cards-Interviewing"></div>
+                </div>
+                <div class="kanban-col col-Offer" id="col-Offer" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'Offer')">
+                    <div class="kanban-col-header"><div class="col-label"><span class="col-dot"></span>Offer</div><span class="col-count" id="count-Offer">0</span></div>
+                    <div class="kanban-cards" id="cards-Offer"></div>
+                </div>
+                <div class="kanban-col col-Rejected" id="col-Rejected" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'Rejected')">
+                    <div class="kanban-col-header"><div class="col-label"><span class="col-dot"></span>Rejected</div><span class="col-count" id="count-Rejected">0</span></div>
+                    <div class="kanban-cards" id="cards-Rejected"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- EDIT MODAL -->
     <div id="edit-modal" class="hidden">
         <div class="card">
-            <h2>Edit Application</h2>
+            <div class="card-label" style="font-size:16px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;margin-bottom:16px;">Edit Application</div>
             <input type="hidden" id="edit-id">
-            <input type="text" id="edit-comp" placeholder="Company Name">
-            <input type="text" id="edit-role" placeholder="Job Title">
-            <input type="text" id="edit-url" placeholder="Job URL (Link)">
-            <select id="edit-stat">
-                <option value="Applied">Applied</option>
-                <option value="Interviewing">Interviewing</option>
-                <option value="Offer">Offer</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            <textarea id="edit-note" placeholder="Notes (salary, contact info, etc.)"></textarea>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <input type="text" id="edit-comp" placeholder="Company Name">
+                <input type="text" id="edit-role" placeholder="Job Title">
+                <input type="text" id="edit-url"  placeholder="Job URL">
+                <select id="edit-stat">
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            <textarea id="edit-note" placeholder="Notes" style="margin-top:8px;"></textarea>
+            <div style="display:flex;gap:10px;margin-top:14px;">
                 <button onclick="saveEdit()">Save Changes</button>
-                <button onclick="closeEdit()" style="background:#64748b;">Cancel</button>
+                <button onclick="closeEdit()" class="btn-muted">Cancel</button>
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
-function renderAnalytics(jobs) {
-    const total = jobs.length;
-    const interviews = jobs.filter(j => j.status === "Interviewing" || j.status === "Offer").length;
-    const responseRate = total === 0 ? 0 : ((interviews / total) * 100).toFixed(1);
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const appsThisWeek = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= oneWeekAgo).length;
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-response').textContent = responseRate + '%';
-    document.getElementById('stat-weekly').textContent = appsThisWeek;
-}
+    let allJobs = [];
+    let currentView = 'list';
+    let draggedId = null;
 
-function esc(text) {
-    if (!text) return '';
-    const p = document.createElement('p');
-    p.textContent = text;
-    return p.innerHTML;
-}
-
-let allJobs = [];
-
-function showLoading() {
-    document.getElementById('loading-spinner').classList.remove('hidden');
-    document.getElementById('job-list').classList.add('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loading-spinner').classList.add('hidden');
-    document.getElementById('job-list').classList.remove('hidden');
-}
-
-async function auth(endpoint) {
-    const usernameValue = document.getElementById('user').value.trim();
-    const passwordValue = document.getElementById('pass').value.trim();
-    if (!usernameValue || !passwordValue) {
-        alert("Please enter both a username and password.");
-        return;
+    function esc(text) {
+        if (!text) return '';
+        const p = document.createElement('p');
+        p.textContent = text;
+        return p.innerHTML;
     }
-    try {
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify({username: usernameValue, password: passwordValue})
-        });
-        const data = await res.json();
-        if (res.ok) {
-            if (endpoint === '/login') {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                loadJobs();
+
+    function showLoading() {
+        document.getElementById('loading-spinner').classList.remove('hidden');
+        document.getElementById('job-list').classList.add('hidden');
+        document.getElementById('kanban-view').classList.add('hidden');
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-spinner').classList.add('hidden');
+        if (currentView === 'list') document.getElementById('job-list').classList.remove('hidden');
+        else document.getElementById('kanban-view').classList.remove('hidden');
+    }
+
+    /* VIEW TOGGLE */
+    function switchView(view) {
+        currentView = view;
+        document.getElementById('btn-list').classList.toggle('active', view === 'list');
+        document.getElementById('btn-kanban').classList.toggle('active', view === 'kanban');
+        document.getElementById('list-filters').style.display = view === 'list' ? 'flex' : 'none';
+        document.getElementById('job-list').classList.toggle('hidden', view !== 'list');
+        document.getElementById('kanban-view').classList.toggle('hidden', view !== 'kanban');
+        view === 'kanban' ? renderKanban() : renderJobs();
+    }
+
+    /* AUTH */
+    async function auth(endpoint) {
+        const u = document.getElementById('user').value.trim();
+        const p = document.getElementById('pass').value.trim();
+        if (!u || !p) { alert("Please enter both a username and password."); return; }
+        try {
+            const res  = await fetch(endpoint, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({username: u, password: p}) });
+            const data = await res.json();
+            if (res.ok) {
+                if (endpoint === '/login') {
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    loadJobs();
+                } else {
+                    alert("Account created! You can now log in.");
+                }
             } else {
-                alert("Account created successfully! You can now click Login.");
+                alert(data.error || "Authentication failed.");
             }
-        } else {
-            alert(data.error || "Authentication failed.");
+        } catch { alert("Could not connect to server."); }
+    }
+
+    /* ADD JOB */
+    async function addJob() {
+        const c = document.getElementById('comp');
+        const r = document.getElementById('role');
+        const u = document.getElementById('url');
+        const s = document.getElementById('stat');
+        const n = document.getElementById('note');
+        showLoading();
+        try {
+            const res = await fetch('/add-job', {
+                method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include',
+                body: JSON.stringify({ company_name: c.value, job_title: r.value, job_url: u.value, status: s.value, notes: n.value })
+            });
+            if (res.ok) { c.value = r.value = u.value = n.value = ''; await loadJobs(); }
+        } catch (err) { console.error(err); } finally { hideLoading(); }
+    }
+
+    /* LOAD */
+    async function loadJobs() {
+        showLoading();
+        try {
+            const res  = await fetch('/tasks', { credentials: 'include' });
+            const data = await res.json();
+            if (res.ok) {
+                allJobs = data.tasks || [];
+                currentView === 'list' ? renderJobs() : renderKanban();
+                renderAnalytics(allJobs);
+                await loadReminders();
+            }
+        } catch (err) { console.error(err); } finally { hideLoading(); }
+    }
+
+    /* ANALYTICS */
+    function renderAnalytics(jobs) {
+        const total = jobs.length;
+        const resp  = jobs.filter(j => j.status === "Interviewing" || j.status === "Offer").length;
+        const rate  = total === 0 ? 0 : ((resp / total) * 100).toFixed(1);
+        const ago   = new Date(); ago.setDate(ago.getDate() - 7);
+        const week  = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= ago).length;
+        document.getElementById('stat-total').textContent    = total;
+        document.getElementById('stat-response').textContent = rate + '%';
+        document.getElementById('stat-weekly').textContent   = week;
+    }
+
+    /* LIST VIEW */
+    function renderJobs() {
+        const filter = document.getElementById('filter-stat').value;
+        const sort   = document.getElementById('sort-date').value;
+        const div    = document.getElementById('job-list');
+
+        let jobs = allJobs.filter(j => filter === 'All' || j.status === filter);
+        jobs.sort((a, b) => sort === 'newest'
+            ? new Date(b.date_applied) - new Date(a.date_applied)
+            : new Date(a.date_applied) - new Date(b.date_applied));
+
+        renderAnalytics(allJobs);
+
+        if (jobs.length === 0) {
+            div.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:50px 0;">No applications found.</p>`;
+            return;
         }
-    } catch (err) {
-        console.error("Auth Error:", err);
-        alert("Could not connect to server.");
-    }
-}
 
-async function addJob() {
-    const compInput = document.getElementById('comp');
-    const roleInput = document.getElementById('role');
-    const urlInput = document.getElementById('url');
-    const statInput = document.getElementById('stat');
-    const noteInput = document.getElementById('note');
-    const jobData = {
-        company_name: compInput.value,
-        job_title: roleInput.value,
-        job_url: urlInput.value,
-        status: statInput.value,
-        notes: noteInput.value
-    };
-    showLoading();
-    try {
-        const res = await fetch('/add-job', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify(jobData)
-        });
-        if (res.ok) {
-            compInput.value = '';
-            roleInput.value = '';
-            urlInput.value = '';
-            noteInput.value = '';
-            await loadJobs();
-        }
-    } catch (err) {
-        console.error("Add Job Error:", err);
-    } finally {
-        hideLoading();
-    }
-}
-
-async function loadJobs() {
-    showLoading();
-    try {
-        const res = await fetch('/tasks', { credentials: 'include' });
-        const data = await res.json();
-        if (res.ok) {
-            allJobs = data.tasks || [];
-            renderJobs();
-            await loadReminders();
-        }
-    } catch (err) {
-        console.error("Load Error:", err);
-    } finally {
-        hideLoading();
-    }
-}
-
-function renderJobs() {
-    const filterValue = document.getElementById('filter-stat').value;
-    const sortValue = document.getElementById('sort-date').value;
-    const jobListDiv = document.getElementById('job-list');
-
-    let filteredJobs = allJobs.filter(j => {
-        if (filterValue === "All") return true;
-        return j.status === filterValue;
-    });
-
-    if (sortValue === "newest") {
-        filteredJobs.sort((a, b) => new Date(b.date_applied) - new Date(a.date_applied));
-    } else {
-        filteredJobs.sort((a, b) => new Date(a.date_applied) - new Date(b.date_applied));
-    }
-
-    renderAnalytics(allJobs);
-
-    if (filteredJobs.length === 0) {
-        jobListDiv.innerHTML = `<p style="text-align: center; color: #64748b;">No applications found.</p>`;
-        return;
-    }
-
-    jobListDiv.innerHTML = filteredJobs.map(j => {
-        const rawUrl = j.job_url || '';
-        const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '#');
-        const linkHtml = rawUrl ? `<a href="${safeUrl}" target="_blank">Link</a>` : `<span>No Link</span>`;
-        return `
+        div.innerHTML = jobs.map(j => {
+            const rawUrl  = j.job_url || '';
+            const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '');
+            const link    = safeUrl ? `<a href="${safeUrl}" target="_blank" class="job-card-link">↗ View Job</a>` : '';
+            const date    = j.date_applied ? new Date(j.date_applied).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
+            return `
             <div class="job-card">
-                <div style="flex: 1;">
-                    <strong>${esc(j.company_name)}</strong> - ${esc(j.job_title)} <br>
-                    <span style="color:var(--primary); font-weight:bold;">${esc(j.status)}</span> | ${linkHtml} <br>
-                    <small><img src="/static/date-71.png" alt="Date Applied" class="icon" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;">${j.date_applied ? new Date(j.date_applied).toLocaleDateString() : 'N/A'} | ${esc(j.notes)}</small>
+                <div style="flex:1;min-width:0;">
+                    <div class="job-card-company">${esc(j.company_name)}</div>
+                    <div class="job-card-role">${esc(j.job_title)}</div>
+                    <div class="job-card-meta">
+                        <span class="status-badge badge-${esc(j.status)}">${esc(j.status)}</span>
+                        <span class="job-card-date">${date}</span>
+                        ${link}
+                    </div>
+                    ${j.notes ? `<div class="job-card-notes">${esc(j.notes)}</div>` : ''}
                     <div id="followup-output-${j.id}" class="followup-output"></div>
                 </div>
                 <div class="action-buttons">
-                    <button class="btn-followup" onclick="generateFollowUp(${j.id})">Follow-Up Email</button>
-                    <button class="btn-edit" onclick="openEdit(${j.id})">Edit</button>
-                    <button class="btn-del" onclick="delJob(${j.id})">Delete</button>
+                    <button class="btn-green" onclick="generateFollowUp(${j.id})">✉ Follow-Up</button>
+                    <button class="btn-blue"  onclick="openEdit(${j.id})">✎ Edit</button>
+                    <button class="btn-red"   onclick="delJob(${j.id})">✕ Delete</button>
                 </div>
-            </div>
-        `;
-    }).join('');
-}
-
-async function generateFollowUp(id) {
-    const job = allJobs.find(j => j.id === id);
-    if (!job) return;
-
-    const outputEl = document.getElementById(`followup-output-${id}`);
-    outputEl.textContent = "Generating email...";
-    outputEl.classList.add('visible');
-
-    try {
-        const res = await fetch('/generate-followup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ company: job.company_name, role: job.job_title })
-        });
-        const data = await res.json();
-        outputEl.textContent = data.email || "Could not generate email.";
-    } catch (err) {
-        outputEl.textContent = "Error connecting to server.";
-        console.error("Follow-Up Error:", err);
+            </div>`;
+        }).join('');
     }
-}
 
-async function delJob(id) {
-    if (confirm("Remove this application?")) {
+    /* KANBAN VIEW */
+    function renderKanban() {
+        ['Applied','Interviewing','Offer','Rejected'].forEach(status => {
+            const col   = document.getElementById(`cards-${status}`);
+            const count = document.getElementById(`count-${status}`);
+            const jobs  = allJobs.filter(j => j.status === status);
+            count.textContent = jobs.length;
+            col.innerHTML = jobs.length === 0
+                ? `<p class="kanban-empty">Drop cards here</p>`
+                : jobs.map(j => {
+                    const date = j.date_applied ? new Date(j.date_applied).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+                    return `
+                    <div class="kanban-card" draggable="true"
+                         ondragstart="onDragStart(event,${j.id})"
+                         ondragend="onDragEnd(event)">
+                        <div class="kanban-card-company">${esc(j.company_name)}</div>
+                        <div class="kanban-card-role">${esc(j.job_title)}</div>
+                        <div class="kanban-card-date">${date}</div>
+                    </div>`;
+                }).join('');
+        });
+    }
+
+    /* DRAG & DROP */
+    function onDragStart(e, id) {
+        draggedId = id;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    function onDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+    }
+    function onDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drag-over');
+    }
+    function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+    async function onDrop(e, newStatus) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        if (!draggedId) return;
+        const job = allJobs.find(j => j.id === draggedId);
+        if (!job || job.status === newStatus) return;
+        job.status = newStatus;   // optimistic update
+        renderKanban();
+        renderAnalytics(allJobs);
+        try {
+            await fetch('/update-job', {
+                method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include',
+                body: JSON.stringify({ id: job.id, company_name: job.company_name, job_title: job.job_title, job_url: job.job_url, status: newStatus, notes: job.notes })
+            });
+        } catch { await loadJobs(); }  // rollback on failure
+        draggedId = null;
+    }
+
+    /* FOLLOW-UP */
+    async function generateFollowUp(id) {
+        const job = allJobs.find(j => j.id === id);
+        if (!job) return;
+        const el = document.getElementById(`followup-output-${id}`);
+        el.textContent = "Generating email...";
+        el.classList.add('visible');
+        try {
+            const res  = await fetch('/generate-followup', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({company: job.company_name, role: job.job_title}) });
+            const data = await res.json();
+            el.textContent = data.email || "Could not generate email.";
+        } catch { el.textContent = "Error connecting to server."; }
+    }
+
+    /* DELETE */
+    async function delJob(id) {
+        if (!confirm("Remove this application?")) return;
         showLoading();
         try {
-            const res = await fetch('/remove-job', {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include',
-                body: JSON.stringify({id})
-            });
+            const res = await fetch('/remove-job', { method: 'DELETE', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({id}) });
             if (res.ok) await loadJobs();
-        } finally {
-            hideLoading();
-        }
+        } finally { hideLoading(); }
     }
-}
 
-function openEdit(id) {
-    const job = allJobs.find(j => j.id === id);
-    if (!job) return;
-    document.getElementById('edit-id').value = job.id;
-    document.getElementById('edit-comp').value = job.company_name;
-    document.getElementById('edit-role').value = job.job_title;
-    document.getElementById('edit-url').value = job.job_url;
-    document.getElementById('edit-stat').value = job.status;
-    document.getElementById('edit-note').value = job.notes;
-    document.getElementById('edit-modal').classList.remove('hidden');
-}
-
-function closeEdit() {
-    document.getElementById('edit-modal').classList.add('hidden');
-}
-
-async function saveEdit() {
-    const jobData = {
-        id: document.getElementById('edit-id').value,
-        company_name: document.getElementById('edit-comp').value,
-        job_title: document.getElementById('edit-role').value,
-        job_url: document.getElementById('edit-url').value,
-        status: document.getElementById('edit-stat').value,
-        notes: document.getElementById('edit-note').value
-    };
-    showLoading();
-    try {
-        const res = await fetch('/update-job', {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            credentials: 'include',
-            body: JSON.stringify(jobData)
-        });
-        if (res.ok) {
-            closeEdit();
-            await loadJobs();
-        } else {
-            alert("Failed to update job.");
-        }
-    } finally {
-        hideLoading();
+    /* EDIT MODAL */
+    function openEdit(id) {
+        const job = allJobs.find(j => j.id === id);
+        if (!job) return;
+        document.getElementById('edit-id').value   = job.id;
+        document.getElementById('edit-comp').value = job.company_name;
+        document.getElementById('edit-role').value = job.job_title;
+        document.getElementById('edit-url').value  = job.job_url;
+        document.getElementById('edit-stat').value = job.status;
+        document.getElementById('edit-note').value = job.notes;
+        document.getElementById('edit-modal').classList.remove('hidden');
     }
-}
+    function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
 
-async function loadReminders() {
-    try {
-        const res = await fetch('/reminders', { credentials: 'include' });
-        const data = await res.json();
-        const section = document.getElementById('reminder-section');
-        const list = document.getElementById('reminder-items');
-        if (res.ok && data.reminders && data.reminders.length > 0) {
-            section.classList.remove('hidden');
-            list.innerHTML = data.reminders.map(r => `
-                <li>
-                    It's been a week since you applied to 
-                    <strong>${esc(r.company_name)}</strong> 
-                    for <em>${esc(r.job_title)}</em>. 
-                    Consider following up.
-                </li>
-            `).join('');
-        } else {
-            section.classList.add('hidden');
-        }
-    } catch (err) {
-        console.error("Reminder Error:", err);
+    async function saveEdit() {
+        const d = {
+            id: document.getElementById('edit-id').value,
+            company_name: document.getElementById('edit-comp').value,
+            job_title:    document.getElementById('edit-role').value,
+            job_url:      document.getElementById('edit-url').value,
+            status:       document.getElementById('edit-stat').value,
+            notes:        document.getElementById('edit-note').value
+        };
+        showLoading();
+        try {
+            const res = await fetch('/update-job', { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(d) });
+            if (res.ok) { closeEdit(); await loadJobs(); }
+            else alert("Failed to update.");
+        } finally { hideLoading(); }
     }
-}
+
+    /* REMINDERS */
+    async function loadReminders() {
+        try {
+            const res  = await fetch('/reminders', { credentials: 'include' });
+            const data = await res.json();
+            const sec  = document.getElementById('reminder-section');
+            const list = document.getElementById('reminder-items');
+            if (res.ok && data.reminders?.length > 0) {
+                sec.classList.remove('hidden');
+                list.innerHTML = data.reminders.map(r => `<li>It's been a week since you applied to <strong>${esc(r.company_name)}</strong> for <em>${esc(r.job_title)}</em>. Consider following up.</li>`).join('');
+            } else {
+                sec.classList.add('hidden');
+            }
+        } catch (err) { console.error(err); }
+    }
 </script>
 </body>
 </html>
