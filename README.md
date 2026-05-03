@@ -8,7 +8,11 @@
 
 ---
 
-<video src="assets/core-workflow.mp4" autoplay loop muted width="100%"></video>
+<video src="https://github.com/user-attachments/assets/65b97fa9-048f-4d68-8379-cc4dcbcdd96d
+
+https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe
+
+" autoplay loop muted width="100%"></video>
 
 ---
 
@@ -40,21 +44,24 @@ Built to simulate a real-world SaaS product, this tool centralizes the job hunt 
 
 ### **1. Core Application Workflow**
 Centralizes the job hunt into a single dashboard with global loading states for asynchronous operations. The interface ensures zero-latency UI updates during state transitions.
-<video src="assets/core-workflow.mp4" autoplay loop muted width="100%"></video>
+<video src="https://github.com/user-attachments/assets/65b97fa9-048f-4d68-8379-cc4dcbcdd96d" autoplay loop muted width="100%"></video>
 
 ### **2. Cloud Persistence & Full CRUD**
 Leverages a PostgreSQL backend to ensure data remains persistent across user sessions. Includes full Create, Read, Update, and Delete capabilities with strict backend validation.
-<video src="assets/crud-demo.mp4" autoplay loop muted width="100%"></video>
+<video src="https://github.com/user-attachments/assets/02f16bf6-b9c6-4a69-9b2f-08a2640f3a6c" autoplay loop muted width="100%"></video>
+
 
 ### **3. Heuristic Outreach Engine**
 A programmatic logic system that identifies applications where no activity has occurred in 7+ days. It generates professional follow-up templates to maintain candidate momentum.
-<video src="assets/ai-follow-up-demo.mp4" autoplay loop muted width="100%"></video>
+<video src="https://github.com/user-attachments/assets/002233aa-4e13-4ad0-9890-361d195c8af9" autoplay loop muted width="100%"></video>
+
 
 <img width="877" height="802" alt="Screenshot 2026-04-25 at 1 40 21 PM" src="https://github.com/user-attachments/assets/d22c70fd-05d1-488a-b044-09ef0d9de6a1" />
 
 ### **4. Interactive Kanban Management**
 A visual drag-and-drop workflow for status tracking. Users can seamlessly move applications through the funnel—from **Applied** to **Interviewing** or **Offer**.
-<video src="assets/kanban-ui-demo.mp4" autoplay loop muted width="100%"></video>
+<video src="https://github.com/user-attachments/assets/412ab852-ee08-45b5-839a-c407d684baac)" autoplay loop muted width="100%"></video>
+
 
 ---
 
@@ -108,7 +115,7 @@ Resume Bullet: Developed and deployed a full-stack job tracking application used
 ## Local Installation
 ```
 # Clone the repository
-git clone [https://github.com/steveBuelow/job-app-tracker.git](https://github.com/steveBuelow/job-app-tracker.git)
+git clone https://github.com/steveBuelow/job-app-tracker.git
 
 # Navigate to the project directory
 cd job-app-tracker
