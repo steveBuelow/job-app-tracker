@@ -101,7 +101,7 @@ JobApplicationTracker/
 
 ## About Me
 
-### (LinkedIn)[www.linkedin.com/in/lawayne-steve-buelow-a8229b402]
+### [LinkedIn](www.linkedin.com/in/lawayne-steve-buelow-a8229b402)
 
 I am a first-year Computer Science student at North Dakota State University focused on building production-ready software. This project represents a shift toward scalable architecture, secure backend design, and deployment workflows that reflect industry standards.
 Resume Bullet: Developed and deployed a full-stack job tracking application used to track 80+ applications across a live PostgreSQL database built with Flask, implementing secure authentication, full CRUD operations, and real-time UI updates, while resolving deployment and version control challenges in a production environment.
