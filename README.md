@@ -6,6 +6,8 @@
 
 **JobTracker Pro** is a production-ready, full-stack pipeline manager designed for the modern job seeker. This application replaces local spreadsheets with a persistent cloud environment, featuring automated application aging logic, a custom Kanban interface, and a heuristic-based outreach generator.
 
+<video src="https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe" autoplay loop muted width="100%"></video>
+
 ---
 
 ## Project Overview
