@@ -8,14 +8,6 @@
 
 ---
 
-<video src="https://github.com/user-attachments/assets/65b97fa9-048f-4d68-8379-cc4dcbcdd96d
-
-https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe
-
-" autoplay loop muted width="100%"></video>
-
----
-
 ## Project Overview
 
 Built to simulate a real-world SaaS product, this tool centralizes the job hunt into a high-performance dashboard. It focuses on secure data manipulation and scalable backend architecture to handle 80+ active applications across a live database.
@@ -60,8 +52,7 @@ A programmatic logic system that identifies applications where no activity has o
 
 ### **4. Interactive Kanban Management**
 A visual drag-and-drop workflow for status tracking. Users can seamlessly move applications through the funnel—from **Applied** to **Interviewing** or **Offer**.
-<video src="https://github.com/user-attachments/assets/412ab852-ee08-45b5-839a-c407d684baac)" autoplay loop muted width="100%"></video>
-
+[https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe](https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe)
 
 ---
 
