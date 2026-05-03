@@ -1,71 +1,71 @@
+
+
 # JobTracker Pro
 
-## [LINK FOR WEBSITE APPLICATION](https://jobtrackerpro-bmff.onrender.com)
+## [[LINK FOR LIVE APPLICATION]](https://jobtrackerpro-bmff.onrender.com)
 
-A secure, full-stack web application designed for the modern job seeker. This tool centralizes your pipeline, tracks application statuses, and maintains critical job data in a persistent cloud environment with sorting features. The app will display a follow-up reminder for jobs created >7 days ago to remind you to follow-up.
+**JobTracker Pro** is a production-ready, full-stack pipeline manager designed for the modern job seeker. This application replaces local spreadsheets with a persistent cloud environment, featuring automated application aging logic, a custom Kanban interface, and a heuristic-based outreach generator.
 
- Production deployment on Render with enviroment-secured PostgreSQL - not local host.
+---
 
+<video src="assets/core-workflow.mp4" autoplay loop muted width="100%"></video>
 
-Built out of a desire to move beyond local storage and explore cloud-based data persistence and secure backend architecture.
-\## Demo
-
-![Job Tracker Demo](Screenshots/job-tracker-demo.gif)
-
-### Dashboard (w follow-up reminder sorting all applications)
-<img width="877" height="802" alt="Screenshot 2026-04-25 at 1 40 21 PM" src="https://github.com/user-attachments/assets/d22c70fd-05d1-488a-b044-09ef0d9de6a1" />
-
+---
 
 ## Project Overview
 
-JobTracker Pro allows users to:
+Built to simulate a real-world SaaS product, this tool centralizes the job hunt into a high-performance dashboard. It focuses on secure data manipulation and scalable backend architecture to handle 80+ active applications across a live database.
 
-* Track job applications in a centralized dashboard
-* Create, edit, and delete job entries (full CRUD)
-* View simple data analytics dashboard
-* Monitor application statuses in real time
-* Persist data securely using a backend database
-* Generate recommended follow-up emails
-* Secured with Werkzeung Security
-
-This project was built to simulate a real-world SaaS product, manipulate secure data, all while strengthening full-stack engineering skills. Production deployment on Render with enviroment-secured PostgreSQL - not local host.
+*   **Centralized Pipeline:** Real-time tracking of company metadata, job URLs, and application status.
+*   **Persistent Cloud Architecture:** Deployed on **Render** with an environment-secured **PostgreSQL** database.
+*   **Heuristic Outreach Engine:** Automatically identifies "stale" applications ($>7$ days) and generates tailored follow-up templates.
+*   **Robust Security:** User data is protected via **PBKDF2 password hashing** and protected session management via **Werkzeug**.
+*   **Dynamic Analytics:** Live calculation of response rates and weekly application velocity.
 
 ---
 
 ## Tech Stack
 
-**Frontend:**
-
-* HTML, CSS, JavaScript (Vanilla JS)
-
-**Backend:**
-
-* Python
-* Flask
-
-**Database:**
-
-* PostgreSQL
-
-**Other Tools:**
-
-* Git & GitHub
-* REST APIs
-* Environment Variables (.env)
-* `Psycopg-2-binary`
-* PBKDF2 password hashing (via Werkzeung)
+| Component | Technologies |
+| :--- | :--- |
+| **Frontend** | Vanilla JavaScript (ES6+), HTML5, CSS3 (Custom Variables), DM Sans Typography |
+| **Backend** | Python 3, Flask, Gunicorn, Dotenv, RESTful API Design |
+| **Database** | PostgreSQL, Psycopg2 (Utilizing RealDictCursor for optimized JSON serialization) |
+| **Security** | Werkzeug Security (Hashing/Salting), Secure Session Cookies (SameSite=Lax) |
+| **DevOps** | Render (Production Hosting), Git/GitHub (Version Control) |
 
 ---
 
 ## Key Features
 
-* User authentication & session management
-* Full CRUD functionality (Create, Read, Update, Delete)
-* Data analytics and simple calculations
-* Real-time UI updates without page reloads
-* Persistent cloud database storage
-* Global loading states for async operations
-* Features weekly in-app follow-up updates
+### **1. Core Application Workflow**
+Centralizes the job hunt into a single dashboard with global loading states for asynchronous operations. The interface ensures zero-latency UI updates during state transitions.
+<video src="assets/core-workflow.mp4" autoplay loop muted width="100%"></video>
+
+### **2. Cloud Persistence & Full CRUD**
+Leverages a PostgreSQL backend to ensure data remains persistent across user sessions. Includes full Create, Read, Update, and Delete capabilities with strict backend validation.
+<video src="assets/crud-demo.mp4" autoplay loop muted width="100%"></video>
+
+### **3. Heuristic Outreach Engine**
+A programmatic logic system that identifies applications where no activity has occurred in 7+ days. It generates professional follow-up templates to maintain candidate momentum.
+<video src="assets/ai-follow-up-demo.mp4" autoplay loop muted width="100%"></video>
+
+<img width="877" height="802" alt="Screenshot 2026-04-25 at 1 40 21 PM" src="https://github.com/user-attachments/assets/d22c70fd-05d1-488a-b044-09ef0d9de6a1" />
+
+### **4. Interactive Kanban Management**
+A visual drag-and-drop workflow for status tracking. Users can seamlessly move applications through the funnel—from **Applied** to **Interviewing** or **Offer**.
+<video src="assets/kanban-ui-demo.mp4" autoplay loop muted width="100%"></video>
+
+---
+
+## Data Analytics & Logic
+
+The dashboard implements automated metrics to provide immediate feedback on job hunt performance:
+
+*   **Response Rate:** Calculated as: 
+    $$\text{Response Rate} = \left( \frac{\text{Interviews} + \text{Offers}}{\text{Total Applications}} \right) \times 100$$
+*   **Weekly Velocity:** Monitors application volume within a rolling 7-day window.
+*   **Application Aging:** Server-side logic filters for entries where `date_applied` $\le 7$ days to trigger follow-up alerts.
 
 ---
 
@@ -74,85 +74,48 @@ This project was built to simulate a real-world SaaS product, manipulate secure 
 ```
 JobApplicationTracker/
 │
-├── app.py              # Server configuration and entry point
-├── routes.py           # REST API endpoints and session management
-├── models.py           # Business logic and SQL CRUD operations
-├── db.py               # PostgreSQL connection and database helper
-├── requirements.txt    # Python dependencies
+├── assets/             # MP4 demos and high-res screenshots
+│   ├── core-workflow.mp4
+│   ├── crud-demo.mp4
+│   ├── ai-follow-up-demo.mp4
+│   └── kanban-ui-demo.mp4
 │
-└── templates/
-│    └── index.html      # Frontend UI (HTML, CSS, and JS)
-│
-└── static/
-    ├── jt-logo.png      # Application Logo
-    └── date-71.png      # 'Applied' icon
+├── static/             # Static UI assets (Logos/Icons)
+├── templates/          # Frontend UI (index.html)
+├── app.py              # Flask entry point & Error handling
+├── routes.py           # REST API endpoints & Session logic
+├── models.py           # Business logic & SQL CRUD execution
+├── db.py               # PostgreSQL connection helper
+└── requirements.txt    # Production dependencies
+
 ```
----
 
-## Challenges & What I Learned
-
-* Managing frontend-backend communication using fetch and REST APIs
-* Handling authentication and session persistence
-* Debugging deployment issues related to environment variables and database connections
-* Resolving Git conflicts and understanding real-world version control workflows
-
----
-
-## Future Improvements
-
-### v1
-
-* [x] Migrate from SQLite database to persistent PostgreSQL
-* [x] Add filtering and sorting (date and type) for job applications
-* [x] Implement analytics (e.g., application success rate)
-* [ ] Add email notifications or reminders
-* [ ] Improve accessibility via Kanban Board
-
-### v2 (end of summer)
-
-* [ ] Scrape job URL to upload information (playwright, selenium, dedicated API)
-* [ ] Improve UI/UX with a modern frontend framework (React)
-* [ ] Implement Anthropic API
-
----
+## Development Timeline
+### April 2026: Architecture & Security
+* Database Migration: Successfully migrated from SQLite to a production-ready PostgreSQL environment.
+* Security Integration: Implemented Werkzeug.security for robust password salting and hashing.
+* Session Management: Configured secure cookie handling and a 7-day permanent session lifetime.
+### May 2026: UI/UX & AI Logic
+* AI Follow-up Integration: Deployed the generate-follow-up endpoint using a heuristic template engine for automated candidate outreach.
+* Asynchronous UX: Deployed global loading spinners and optimized fetch requests for non-blocking CRUD actions.
+* Kanban Logic: Developed a custom drag-and-drop interface using Vanilla JS, eliminating the need for heavy external libraries.
+* Production Launch: Configured Render deployment with Gunicorn and environment-secured PostgreSQL strings.
 
 ## About Me
-
-I'm a first-year Computer Science student at NDSU
-building production-ready full-stack applications. Currently 
-pursuing software engineering internships while developing 
-projects that go beyond coursework — focusing on real deployment, 
-secure backend architecture, and clean user experience.
-
----
-
-## Resume Bullet
-
-Developed and deployed a full-stack job tracking application used to track 80+ applications across a live PostgreSQL database built with Flask, implementing secure authentication, full CRUD operations, and real-time UI updates, while resolving deployment and version control challenges in a production environment.
-
----
-
-## Why This Project Matters
-
-This project marks a shift from simple projects to building scalable applications that reflect industry practices, including backend architecture, database design, and deployment workflows.
-
----
+I am a first-year Computer Science student at North Dakota State University focused on building production-ready software. This project represents a shift toward scalable architecture, secure backend design, and deployment workflows that reflect industry standards.
+Resume Bullet: Developed and deployed a full-stack job tracking application used to track 80+ applications across a live PostgreSQL database built with Flask, implementing secure authentication, full CRUD operations, and real-time UI updates, while resolving deployment and version control challenges in a production environment.
 
 ## Local Installation
+```
+# Clone the repository
+git clone [https://github.com/steveBuelow/job-app-tracker.git](https://github.com/steveBuelow/job-app-tracker.git)
 
-```bash
-git clone https://github.com/your-username/jobtracker-pro.git
-cd jobtracker-pro
+# Navigate to the project directory
+cd job-app-tracker
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the application
 python app.py
 ```
-
-—
-## Development Timeline
-
-**April 2026**
-
-* Finalized full CRUD cycle, enabling users to edit and delete entries with real-time UI updates
-* Implemented global loading spinners for improved UX during async operations
-* Resolved Git branch divergence and optimized merge workflows for stable deployment
-
