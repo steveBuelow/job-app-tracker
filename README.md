@@ -1,124 +1,149 @@
-
-
 # JobTracker Pro
 
-## [[LINK FOR LIVE APPLICATION]](https://jobtrackerpro-bmff.onrender.com)
+**JobTracker Pro** is a full-stack job application tracking system that replaces spreadsheet-based workflows with a persistent, structured pipeline built with Flask and PostgreSQL. It includes real-time application tracking, automated follow-up detection, and a Kanban-style interface for managing a high-volume job search.
 
-**JobTracker Pro** is a production-ready, full-stack pipeline manager designed for the modern job seeker. This application replaces local spreadsheets with a persistent cloud environment, featuring automated application aging logic, a custom Kanban interface, and a heuristic-based outreach generator.
+## Live Demo
+
+[Live Application](https://jobtrackerpro-bmff.onrender.com)
+
+## Overview
+
+JobTracker Pro is a full-stack web application designed to centralize and organize the job search process. It was built to handle 80+ active applications with persistent storage, secure authentication, and a workflow-based interface.
 
 <video src="https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe" autoplay loop muted width="100%"></video>
 
----
-
-## Project Overview
-
-Built to simulate a real-world SaaS product, this tool centralizes the job hunt into a high-performance dashboard. It focuses on secure data manipulation and scalable backend architecture to handle 80+ active applications across a live database.
-
-*   **Centralized Pipeline:** Real-time tracking of company metadata, job URLs, and application status.
-*   **Persistent Cloud Architecture:** Deployed on **Render** with an environment-secured **PostgreSQL** database.
-*   **Heuristic Outreach Engine:** Automatically identifies "stale" applications ($>7$ days) and generates tailored follow-up templates.
-*   **Robust Security:** User data is protected via **PBKDF2 password hashing** and protected session management via **Werkzeug**.
-*   **Dynamic Analytics:** Live calculation of response rates and weekly application velocity.
-
----
-
-## Tech Stack
-
-| Component | Technologies |
-| :--- | :--- |
-| **Frontend** | Vanilla JavaScript (ES6+), HTML5, CSS3 (Custom Variables), DM Sans Typography |
-| **Backend** | Python 3, Flask, Gunicorn, Dotenv, RESTful API Design |
-| **Database** | PostgreSQL, Psycopg2 (Utilizing RealDictCursor for optimized JSON serialization) |
-| **Security** | Werkzeug Security (Hashing/Salting), Secure Session Cookies (SameSite=Lax) |
-| **DevOps** | Render (Production Hosting), Git/GitHub (Version Control) |
-
----
+The project focuses on:
+- Persistent cloud database storage
+- RESTful backend design
+- Stateful session handling
+- Workflow automation logic
+- Responsive asynchronous frontend updates
 
 ## Key Features
 
-### **1. Core Application Workflow**
-Centralizes the job hunt into a single dashboard with global loading states for asynchronous operations. The interface ensures zero-latency UI updates during state transitions.
+### Application Pipeline Management
+A centralized system for tracking job applications, including:
+- Company information
+- Job URLs and role details
+- Status tracking: Applied, Interviewing, Offer, Rejected
+- Full CRUD lifecycle for each application
+
 <video src="https://github.com/user-attachments/assets/65b97fa9-048f-4d68-8379-cc4dcbcdd96d" autoplay loop muted width="100%"></video>
 
-### **2. Cloud Persistence & Full CRUD**
-Leverages a PostgreSQL backend to ensure data remains persistent across user sessions. Includes full Create, Read, Update, and Delete capabilities with strict backend validation.
 <video src="https://github.com/user-attachments/assets/02f16bf6-b9c6-4a69-9b2f-08a2640f3a6c" autoplay loop muted width="100%"></video>
 
+### Kanban Workflow Interface
+A custom drag-and-drop Kanban board built in Vanilla JavaScript:
+- Real-time status updates without page refresh
+- Client-side state synchronization with the backend API
+- Minimal dependency design
 
-### **3. Heuristic Outreach Engine**
-A programmatic logic system that identifies applications where no activity has occurred in 7+ days. It generates professional follow-up templates to maintain candidate momentum.
+### Application Aging & Follow-Up Logic
+A server-side system that identifies inactive applications:
+- Flags applications with no updates for 7+ days
+- Generates structured follow-up message templates
+- Supports consistent outreach during the job search process
+
 <video src="https://github.com/user-attachments/assets/002233aa-4e13-4ad0-9890-361d195c8af9" autoplay loop muted width="100%"></video>
-
 
 <img width="877" height="802" alt="Screenshot 2026-04-25 at 1 40 21 PM" src="https://github.com/user-attachments/assets/d22c70fd-05d1-488a-b044-09ef0d9de6a1" />
 
-### **4. Interactive Kanban Management**
-A visual drag-and-drop workflow for status tracking. Users can seamlessly move applications through the funnel—from **Applied** to **Interviewing** or **Offer**.
-<video src="https://github.com/user-attachments/assets/a125ba2b-2bcc-4b46-992a-c225117a6cbe" autoplay loop muted width="100%"></video>
+### Analytics Dashboard
+Lightweight analytics for tracking job search progress:
+- Response rate calculation
+- Weekly application velocity
+- Application status distribution
 
----
+### Authentication & Security
+Built with secure session handling:
+- Password hashing and salting using Werkzeug (PBKDF2)
+- Secure session cookies with SameSite=Lax
+- Environment-based configuration for deployment
 
-## Data Analytics & Logic
+## Tech Stack
 
-The dashboard implements automated metrics to provide immediate feedback on job hunt performance:
+| Layer | Technologies |
+| --- | --- |
+| Frontend | HTML5, Vanilla JavaScript (ES6+), CSS3 |
+| Backend | Python, Flask, Gunicorn |
+| Database | PostgreSQL, Psycopg2 |
+| Security | Werkzeug Security (PBKDF2), Secure Sessions |
+| Deployment | Render, Git/GitHub |
 
-*   **Response Rate:** Calculated as: 
-    $$\text{Response Rate} = \left( \frac{\text{Interviews} + \text{Offers}}{\text{Total Applications}} \right) \times 100$$
-*   **Weekly Velocity:** Monitors application volume within a rolling 7-day window.
-*   **Application Aging:** Server-side logic filters for entries where `date_applied` $\le 7$ days to trigger follow-up alerts.
+## Architecture
 
----
+```
+Frontend (Vanilla JS)
+        ↓ REST API
+Flask Backend (app.py / routes.py)
+        ↓
+Business Logic Layer (models.py)
+        ↓
+PostgreSQL Database
+```
+
+## Project structure:
+- `routes.py` handles API endpoints and request logic
+- `models.py` manages database operations and business rules
+- `db.py` manages database connections
+- `app.py` serves as the application entry point and configuration layer
+
+## Data Model & Logic
+### Application Aging Rule
+Applications are evaluated based on their date_applied value:
+
+```
+if current_date - date_applied >= 7 days:
+    mark as eligible for follow-up
+```
+
+### Response Rate Calculation
+
+```Response Rate = (Interviews + Offers) / Total Applications × 100```
+
+### Weekly Application Velocity
+Tracks the number of applications submitted within a rolling 7-day window to measure consistency.
+## Development Highlights
+### Database Migration
+Migrated from SQLite to PostgreSQL for persistent cloud deployment and improved scalability.
+### Backend Refactor
+Refactored the project from a monolithic structure into modular components:
+* API routes separated from business logic
+* Database abstraction layer introduced
+### Frontend Optimization
+Rebuilt UI interactions using asynchronous fetch-based updates to avoid full-page reloads.
+### Production Deployment
+Configured for Render deployment using Gunicorn and environment-based configuration.
 
 ## Project Structure
-
 ```
 JobApplicationTracker/
 │
-├── assets/             # MP4 demos and high-res screenshots
-│   ├── core-workflow.mp4
-│   ├── crud-demo.mp4
-│   ├── ai-follow-up-demo.mp4
-│   └── kanban-ui-demo.mp4
-│
-├── static/             # Static UI assets (Logos/Icons)
-├── templates/          # Frontend UI (index.html)
-├── app.py              # Flask entry point & Error handling
-├── routes.py           # REST API endpoints & Session logic
-├── models.py           # Business logic & SQL CRUD execution
-├── db.py               # PostgreSQL connection helper
-└── requirements.txt    # Production dependencies
-
+├── assets/              # UI demos and screenshots
+├── static/              # CSS and UI assets
+├── templates/           # HTML frontend
+├── app.py               # Application entry point
+├── routes.py            # REST API endpoints
+├── models.py            # Business logic + DB operations
+├── db.py                # Database connection layer
+└── requirements.txt     # Dependencies
 ```
 
-## Development Timeline
-### April 2026: Architecture & Security
-* Database Migration: Successfully migrated from SQLite to a production-ready PostgreSQL environment.
-* Security Integration: Implemented Werkzeug.security for robust password salting and hashing.
-* Session Management: Configured secure cookie handling and a 7-day permanent session lifetime.
-### May 2026: UI/UX & AI Logic
-* AI Follow-up Integration: Deployed the generate-follow-up endpoint using a heuristic template engine for automated candidate outreach.
-* Asynchronous UX: Deployed global loading spinners and optimized fetch requests for non-blocking CRUD actions.
-* Kanban Logic: Developed a custom drag-and-drop interface using Vanilla JS, eliminating the need for heavy external libraries.
-* Production Launch: Configured Render deployment with Gunicorn and environment-secured PostgreSQL strings.
-
-## About Me
-
-### [LinkedIn](www.linkedin.com/in/lawayne-steve-buelow-a8229b402)
-
-I am a first-year Computer Science student at North Dakota State University focused on building production-ready software. This project represents a shift toward scalable architecture, secure backend design, and deployment workflows that reflect industry standards.
-Resume Bullet: Developed and deployed a full-stack job tracking application used to track 80+ applications across a live PostgreSQL database built with Flask, implementing secure authentication, full CRUD operations, and real-time UI updates, while resolving deployment and version control challenges in a production environment.
-
-## Local Installation
+## Installation
 ```
-# Clone the repository
 git clone https://github.com/steveBuelow/job-app-tracker.git
-
-# Navigate to the project directory
 cd job-app-tracker
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Run the application
 python app.py
 ```
+
+## About Me
+I am a first-year Computer Science student at North Dakota State University focused on building production-oriented software systems.
+This project reflects a shift from academic exercises to real-world engineering practices, including:
+* Backend architecture design
+* Secure authentication systems
+* Cloud deployment workflows
+* State-driven frontend design
+
+## Resume Summary
+Developed and deployed a full-stack job application tracking system using Flask and PostgreSQL, implementing secure authentication, RESTful API design, and a custom Kanban workflow interface. Built automated application aging logic and real-time analytics to support structured job search tracking across 80+ entries in a production cloud environment.
