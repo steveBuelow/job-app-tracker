@@ -2,9 +2,7 @@
 
 **JobTracker Pro** is a full-stack job application tracking system that replaces spreadsheet-based workflows with a persistent, structured pipeline built with Flask and PostgreSQL. It includes real-time application tracking, automated follow-up detection, and a Kanban-style interface for managing a high-volume job search.
 
-## Live Demo
-
-[Live Application](https://jobtrackerpro-bmff.onrender.com)
+## [Link for Live Application](https://jobtrackerpro-bmff.onrender.com)
 
 ## Overview
 
