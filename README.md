@@ -28,8 +28,6 @@ A centralized system for tracking job applications, including:
 
 <video src="https://github.com/user-attachments/assets/65b97fa9-048f-4d68-8379-cc4dcbcdd96d" autoplay loop muted width="100%"></video>
 
-<video src="https://github.com/user-attachments/assets/02f16bf6-b9c6-4a69-9b2f-08a2640f3a6c" autoplay loop muted width="100%"></video>
-
 ### Kanban Workflow Interface
 A custom drag-and-drop Kanban board built in Vanilla JavaScript:
 - Real-time status updates without page refresh
