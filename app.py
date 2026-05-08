@@ -8,7 +8,8 @@ from routes import register_routes
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 
-app.config['SESSION_PERMANENT'] = True
+is_prod = os.getenv("FLASK_ENV") =="production"
+SESSION_COOKIE_SECURE=is_prod,
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
 app.config.update(
