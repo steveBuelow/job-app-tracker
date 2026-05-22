@@ -220,9 +220,8 @@ def register_routes(app):
     @app.route("/reminders")
     def get_reminders():
         if "user_id" not in session:
-            return jsonify({"error": "Unauthorized"}), 401  # fixed typo
-
-        seven_days_ago = datetime.now() - timedelta(days=7)
+            return jsonify({"error": "Unauthorized"}), 401 
+        
         with get_db() as conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -232,9 +231,9 @@ def register_routes(app):
                     WHERE user_id     = %s
                       AND status      = 'Applied'
                       AND followed_up = FALSE
-                      AND date_applied <= %s
+                      AND date_applied <= NOW() - INTERVAL '7 days'
                     """,
-                    (session["user_id"], seven_days_ago),
+                    (session["user_id"],),
                 )
                 return jsonify({"reminders": cur.fetchall()})
 
