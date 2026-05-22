@@ -15,11 +15,11 @@ from models import (
     update_job,
 )
 
-# ─── Constants ────────────────────────────────────────────────────────────────
+#  Constants 
 
 ALLOWED_STATUSES = {"Applied", "Interviewing", "Offer", "Rejected"}
 
-# ─── Sanitisation helpers ─────────────────────────────────────────────────────
+#  Sanitisation helpers
 
 def _strip(val, max_len=None):
     """Coerce to str, strip whitespace, optionally enforce max length."""
@@ -70,7 +70,7 @@ def _require_int_id(data, key="id"):
     return val, None
 
 
-# ─── Route registration ───────────────────────────────────────────────────────
+#  Route registration 
 
 def register_routes(app):
 
@@ -86,13 +86,13 @@ def register_routes(app):
             response.headers["Cache-Control"] = "no-store"
         return response
 
-    # ── Pages ─────────────────────────────────────────────────────────────────
+    #  Pages 
 
     @app.route("/")
     def index():
         return render_template("index.html")
 
-    # ── Auth ──────────────────────────────────────────────────────────────────
+    #  Auth 
 
     @app.route("/signup", methods=["POST"])
     def signup():
@@ -136,7 +136,7 @@ def register_routes(app):
         session.clear()
         return jsonify({"status": "Logged out."}), 200
 
-    # ── Jobs ──────────────────────────────────────────────────────────────────
+    #  Jobs 
 
     @app.route("/tasks")
     def get_tasks():
@@ -215,7 +215,7 @@ def register_routes(app):
         new_state = toggle_followup(job_id, session["user_id"])
         return jsonify({"success": True, "followed_up": new_state}), 200
 
-    # ── Reminders ─────────────────────────────────────────────────────────────
+    #  Reminders 
 
     @app.route("/reminders")
     def get_reminders():
@@ -237,7 +237,7 @@ def register_routes(app):
                 )
                 return jsonify({"reminders": cur.fetchall()})
 
-    # ── AI Follow-up generation ───────────────────────────────────────────────
+    #  AI Follow-up generation 
 
     @app.route("/generate-followup", methods=["POST"])
     def generate_followup():

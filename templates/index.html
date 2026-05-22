@@ -592,7 +592,6 @@ function toast(message, type = 'info', duration = 3500) {
     const el = document.createElement('div');
     el.className = `toast ${type}`;
     el.innerHTML = `
-        <span class="toast-icon">${TOAST_ICONS[type] ?? 'ℹ️'}</span>
         <span class="toast-msg">${esc(message)}</span>
     `;
     container.appendChild(el);

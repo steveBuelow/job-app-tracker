@@ -12,13 +12,10 @@ app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 
 is_prod = os.getenv("FLASK_ENV") == "production"
 
-# BUG FIX: original had SESSION_COOKIE_SECURE=is_prod as a bare expression
-# (comma made it a tuple, not a config line), then overrode it to always True.
-# Now correctly env-aware.
 app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=is_prod,   # True in prod, False in dev (allows HTTP)
-    SESSION_COOKIE_HTTPONLY=True,    # JS cannot touch the session cookie
+    SESSION_COOKIE_SECURE=is_prod,   
+    SESSION_COOKIE_HTTPONLY=True, 
     PERMANENT_SESSION_LIFETIME=timedelta(days=7),
 )
 
