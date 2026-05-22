@@ -1,46 +1,78 @@
 from db import get_db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 def create_user(username, password):
     hashed_pw = generate_password_hash(password)
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_pw))
-        conn.commit()
+            cur.execute(
+                "INSERT INTO users (username, password) VALUES (%s, %s)",
+                (username, hashed_pw),
+            )
+            conn.commit()
+
 
 def find_user(username, password):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, password FROM users WHERE username = %s", (username,))
+            cur.execute(
+                "SELECT id, password FROM users WHERE username = %s",
+                (username,),
+            )
             user = cur.fetchone()
-            if user and check_password_hash(user['password'], password):
-                return user['id']
-        return None
+            if user and check_password_hash(user["password"], password):
+                return user["id"]
+            return None
+
 
 def create_job(company_name, job_title, status, job_url, notes, user_id):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO applications (company_name, job_title, status, job_url, notes, date_applied, user_id) VALUES (%s,%s,%s,%s,%s, NOW(),%s)",
-                (company_name, job_title, status, job_url, notes, user_id)
+                """INSERT INTO applications
+                   (company_name, job_title, status, job_url, notes,
+                    date_applied, user_id, followed_up)
+                   VALUES (%s, %s, %s, %s, %s, NOW(), %s, FALSE)""",
+                (company_name, job_title, status, job_url, notes, user_id),
             )
-        conn.commit()
+            conn.commit()
+
 
 def delete_job(job_id, user_id):
     with get_db() as conn:
         with conn.cursor() as cur:
-            cur.execute("DELETE FROM applications WHERE id=%s AND user_id=%s", (job_id, user_id))
-        conn.commit()
+            cur.execute(
+                "DELETE FROM applications WHERE id = %s AND user_id = %s",
+                (job_id, user_id),
+            )
+            conn.commit()
+
 
 def update_job(job_id, user_id, company_name, job_title, status, job_url, notes):
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """
-                UPDATE applications
-                SET company_name=%s, job_title=%s, status=%s, job_url=%s, notes=%s
-                WHERE id=%s AND user_id=%s
-                """,
-                (company_name, job_title, status, job_url, notes, job_id, user_id)
+                """UPDATE applications
+                   SET company_name=%s, job_title=%s, status=%s,
+                       job_url=%s, notes=%s
+                   WHERE id=%s AND user_id=%s""",
+                (company_name, job_title, status, job_url, notes, job_id, user_id),
             )
-        conn.commit()
+            conn.commit()
+
+
+def toggle_followup(job_id, user_id):
+    """Flip followed_up for a job owned by user_id. Returns the new bool value."""
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE applications
+                   SET followed_up = NOT followed_up
+                   WHERE id = %s AND user_id = %s
+                   RETURNING followed_up""",
+                (job_id, user_id),
+            )
+            row = cur.fetchone()
+            conn.commit()
+            return bool(row["followed_up"]) if row else False

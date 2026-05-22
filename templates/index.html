@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JobTracker Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -49,6 +50,9 @@
         .logo { height: 40px; }
         .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
         .header-title span { color: var(--primary); }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .btn-logout { background: transparent; color: var(--text-muted); border: 1px solid var(--border); font-size: 13px; padding: 7px 14px; }
+        .btn-logout:hover { background: var(--red-dim); color: var(--red); border-color: rgba(248,81,73,0.3); }
 
         /* CARD */
         .card {
@@ -78,16 +82,21 @@
             color: var(--text);
             font-family: 'DM Sans', sans-serif;
             font-size: 14px;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s, box-shadow 0.15s;
             outline: none;
         }
         input:focus, textarea:focus, select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-dim);
         }
+        input.field-error, textarea.field-error, select.field-error {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px var(--red-dim);
+        }
         select option { background: var(--surface2); }
         textarea { resize: vertical; min-height: 70px; }
         ::placeholder { color: var(--text-subtle); }
+        .field-hint { font-size: 12px; color: var(--red); margin: 2px 0 4px 2px; min-height: 18px; }
 
         /* BUTTONS */
         button {
@@ -101,13 +110,31 @@
             font-weight: 600;
             font-size: 14px;
             transition: opacity 0.15s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
         }
-        button:hover { opacity: 0.85; }
-        button:active { transform: scale(0.98); }
-        .btn-muted { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
-        .btn-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(248,81,73,0.3);  font-size: 12px; padding: 6px 12px; }
-        .btn-blue  { background: var(--primary-dim); color: var(--primary); border: 1px solid rgba(47,129,247,0.3); font-size: 12px; padding: 6px 12px; }
-        .btn-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(63,185,80,0.3);  font-size: 12px; padding: 6px 12px; }
+        button:hover:not(:disabled) { opacity: 0.85; }
+        button:active:not(:disabled) { transform: scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-muted  { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-red    { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(248,81,73,0.3);  font-size: 12px; padding: 6px 12px; }
+        .btn-blue   { background: var(--primary-dim); color: var(--primary); border: 1px solid rgba(47,129,247,0.3); font-size: 12px; padding: 6px 12px; }
+        .btn-green  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(63,185,80,0.3);  font-size: 12px; padding: 6px 12px; }
+        .btn-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); font-size: 12px; padding: 6px 12px; }
+
+        /* Button spinner */
+        .btn-spinner {
+            width: 12px; height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        button.loading .btn-spinner { display: inline-block; }
+        button.loading .btn-label   { opacity: 0.5; }
 
         .hidden { display: none !important; }
 
@@ -171,7 +198,7 @@
         .filters-row { display: flex; gap: 8px; flex: 1; justify-content: flex-end; flex-wrap: wrap; }
         .filters-row select { width: auto; margin: 0; min-width: 150px; flex: 1; }
 
-        /* LIST CARDS */
+        /* JOB CARDS */
         .job-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -185,6 +212,8 @@
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         .job-card:hover { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary-dim); }
+        .job-card.is-followed-up { opacity: 0.65; }
+        .job-card.is-followed-up:hover { border-color: var(--green); box-shadow: 0 0 0 1px var(--green-dim); }
         .job-card-company { font-weight: 600; font-size: 15px; }
         .job-card-role { color: var(--text-muted); font-size: 13px; margin-top: 3px; }
         .job-card-meta { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
@@ -195,9 +224,16 @@
             text-transform: uppercase; letter-spacing: 0.04em;
         }
         .badge-Applied      { background: var(--primary-dim); color: var(--primary); }
-        .badge-Interviewing { background: var(--yellow-dim);  color: var(--yellow); }
-        .badge-Offer        { background: var(--green-dim);   color: var(--green); }
-        .badge-Rejected     { background: var(--red-dim);     color: var(--red); }
+        .badge-Interviewing { background: var(--yellow-dim);  color: var(--yellow);  }
+        .badge-Offer        { background: var(--green-dim);   color: var(--green);   }
+        .badge-Rejected     { background: var(--red-dim);     color: var(--red);     }
+
+        .followed-up-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px;
+            background: var(--green-dim); color: var(--green);
+            letter-spacing: 0.04em;
+        }
 
         .job-card-date  { font-size: 12px; color: var(--text-subtle); font-family: 'DM Mono', monospace; }
         .job-card-notes { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
@@ -206,21 +242,6 @@
 
         .action-buttons { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
         .job-card:hover .action-buttons { opacity: 1; }
-
-        .followup-output {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--text);
-            white-space: pre-wrap;
-            background: var(--bg);
-            border-radius: 8px;
-            padding: 12px 14px;
-            border-left: 3px solid var(--green);
-            font-family: 'DM Mono', monospace;
-            line-height: 1.6;
-            display: none;
-        }
-        .followup-output.visible { display: block; }
 
         /* REMINDERS */
         .reminder-banner {
@@ -241,7 +262,6 @@
 
         /* KANBAN */
         .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; }
-
         .kanban-col {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -250,7 +270,6 @@
             transition: box-shadow 0.2s, border-color 0.2s;
         }
         .kanban-col.drag-over { box-shadow: 0 0 0 2px var(--primary); border-color: var(--primary); }
-
         .kanban-col-header {
             display: flex;
             align-items: center;
@@ -261,18 +280,15 @@
         .col-label { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
         .col-dot { width: 8px; height: 8px; border-radius: 50%; }
         .col-count { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
-
-        .col-Applied     .col-label { color: var(--primary); }
-        .col-Applied     .col-dot   { background: var(--primary); }
+        .col-Applied .col-label      { color: var(--primary); }
+        .col-Applied .col-dot        { background: var(--primary); }
         .col-Interviewing .col-label { color: var(--yellow); }
-        .col-Interviewing .col-dot  { background: var(--yellow); }
-        .col-Offer       .col-label { color: var(--green); }
-        .col-Offer       .col-dot   { background: var(--green); }
-        .col-Rejected    .col-label { color: var(--red); }
-        .col-Rejected    .col-dot   { background: var(--red); }
-
+        .col-Interviewing .col-dot   { background: var(--yellow); }
+        .col-Offer .col-label        { color: var(--green); }
+        .col-Offer .col-dot          { background: var(--green); }
+        .col-Rejected .col-label     { color: var(--red); }
+        .col-Rejected .col-dot       { background: var(--red); }
         .kanban-cards { padding: 10px; min-height: 80px; }
-
         .kanban-card {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -288,19 +304,75 @@
         .kanban-card-company { font-weight: 600; font-size: 13px; }
         .kanban-card-role    { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
         .kanban-card-date    { font-size: 11px; color: var(--text-subtle); margin-top: 10px; font-family: 'DM Mono', monospace; }
+        .kanban-card-followedup { font-size: 11px; color: var(--green); margin-top: 4px; }
         .kanban-empty        { font-size: 12px; color: var(--text-subtle); padding: 16px; text-align: center; }
 
-        /* MODAL */
-        #edit-modal {
+        /* MODALS (shared base) */
+        .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.75);
             backdrop-filter: blur(6px);
             display: flex; justify-content: center; align-items: center;
             z-index: 200;
         }
-        #edit-modal .card { width: 100%; max-width: 500px; margin: 20px; animation: slideUp 0.2s ease; }
-        #edit-modal .card-label { font-size: 16px; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 700; }
+        .modal-overlay .card { width: 100%; max-width: 500px; margin: 20px; animation: slideUp 0.2s ease; }
+        .modal-overlay .card-label { font-size: 16px; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 700; }
         @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* FOLLOW-UP MODAL specifics */
+        #followup-modal .card { max-width: 560px; }
+        .followup-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+        .followup-meta strong { color: var(--text); }
+        .followup-email-box {
+            font-size: 13px;
+            color: var(--text);
+            white-space: pre-wrap;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 14px 16px;
+            border-left: 3px solid var(--green);
+            font-family: 'DM Mono', monospace;
+            line-height: 1.6;
+            min-height: 80px;
+        }
+        .followup-loading { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 13px; }
+        .followup-loading .loader { width: 18px; height: 18px; border-width: 2px; }
+
+        /* TOAST */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            min-width: 260px;
+            max-width: 360px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            pointer-events: all;
+            animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: var(--shadow);
+        }
+        .toast.removing { animation: toastOut 0.25s ease forwards; }
+        .toast-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+        .toast-msg  { flex: 1; line-height: 1.4; }
+        .toast.success { border-left: 3px solid var(--green); }
+        .toast.error   { border-left: 3px solid var(--red); }
+        .toast.info    { border-left: 3px solid var(--primary); }
+        .toast.warn    { border-left: 3px solid var(--yellow); }
+        @keyframes toastIn  { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastOut { from { transform: translateX(0);    opacity: 1; } to { transform: translateX(30px); opacity: 0; } }
 
         /* RESPONSIVE */
         @media (max-width: 900px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
@@ -315,17 +387,31 @@
     <div class="header">
         <img src="/static/jt-logo.png" alt="JobTracker Pro" class="logo" onerror="this.style.display='none'">
         <div class="header-title">Job<span>Tracker</span> Pro</div>
+        <div class="header-right">
+            <button id="logout-btn" class="btn-muted btn-logout hidden" onclick="logout()">
+                <span class="btn-label">Sign Out</span>
+                <span class="btn-spinner"></span>
+            </button>
+        </div>
     </div>
 
     <!-- AUTH -->
     <div id="auth-section">
         <div class="card">
             <div class="auth-title">Welcome back</div>
-            <input type="text" id="user" placeholder="Username">
-            <input type="password" id="pass" placeholder="Password">
+            <input type="text"     id="user" placeholder="Username" maxlength="50" autocomplete="username">
+            <div class="field-hint" id="hint-user"></div>
+            <input type="password" id="pass" placeholder="Password" maxlength="128" autocomplete="current-password">
+            <div class="field-hint" id="hint-pass"></div>
             <div class="auth-buttons">
-                <button onclick="auth('/signup')" class="btn-muted" style="flex:1;">Create Account</button>
-                <button onclick="auth('/login')" style="flex:1;">Login →</button>
+                <button onclick="auth('/signup')" class="btn-muted" style="flex:1;" id="btn-signup">
+                    <span class="btn-label">Create Account</span>
+                    <span class="btn-spinner"></span>
+                </button>
+                <button onclick="auth('/login')" style="flex:1;" id="btn-login">
+                    <span class="btn-label">Login →</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -337,9 +423,9 @@
         <div class="card">
             <div class="card-label">New Application</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <input type="text" id="comp" placeholder="Company Name">
-                <input type="text" id="role" placeholder="Job Title">
-                <input type="text" id="url"  placeholder="Job URL">
+                <input type="text" id="comp" placeholder="Company Name *"    maxlength="120">
+                <input type="text" id="role" placeholder="Job Title *"        maxlength="120">
+                <input type="text" id="url"  placeholder="Job URL (https://)" maxlength="500">
                 <select id="stat">
                     <option value="Applied">Applied</option>
                     <option value="Interviewing">Interviewing</option>
@@ -347,8 +433,14 @@
                     <option value="Rejected">Rejected</option>
                 </select>
             </div>
-            <textarea id="note" placeholder="Notes (salary, contact, etc.)" style="margin-top:8px;"></textarea>
-            <button onclick="addJob()" style="margin-top:12px;">+ Add to Pipeline</button>
+            <textarea id="note" placeholder="Notes — salary, contact, interview details…" style="margin-top:8px;" maxlength="2000"></textarea>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
+                <button id="btn-add" onclick="addJob()">
+                    <span class="btn-label">+ Add to Pipeline</span>
+                    <span class="btn-spinner"></span>
+                </button>
+                <span id="char-count" style="font-size:12px;color:var(--text-subtle);"></span>
+            </div>
         </div>
 
         <!-- ANALYTICS -->
@@ -412,18 +504,17 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- EDIT MODAL -->
-    <div id="edit-modal" class="hidden">
+    <div id="edit-modal" class="modal-overlay hidden">
         <div class="card">
             <div class="card-label" style="font-size:16px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;margin-bottom:16px;">Edit Application</div>
             <input type="hidden" id="edit-id">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <input type="text" id="edit-comp" placeholder="Company Name">
-                <input type="text" id="edit-role" placeholder="Job Title">
-                <input type="text" id="edit-url"  placeholder="Job URL">
+                <input type="text" id="edit-comp" placeholder="Company Name *" maxlength="120">
+                <input type="text" id="edit-role" placeholder="Job Title *"    maxlength="120">
+                <input type="text" id="edit-url"  placeholder="Job URL"        maxlength="500">
                 <select id="edit-stat">
                     <option value="Applied">Applied</option>
                     <option value="Interviewing">Interviewing</option>
@@ -431,290 +522,667 @@
                     <option value="Rejected">Rejected</option>
                 </select>
             </div>
-            <textarea id="edit-note" placeholder="Notes" style="margin-top:8px;"></textarea>
+            <textarea id="edit-note" placeholder="Notes" style="margin-top:8px;" maxlength="2000"></textarea>
             <div style="display:flex;gap:10px;margin-top:14px;">
-                <button onclick="saveEdit()">Save Changes</button>
+                <button id="btn-save-edit" onclick="saveEdit()">
+                    <span class="btn-label">Save Changes</span>
+                    <span class="btn-spinner"></span>
+                </button>
                 <button onclick="closeEdit()" class="btn-muted">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOLLOW-UP MODAL -->
+    <div id="followup-modal" class="modal-overlay hidden">
+        <div class="card">
+            <div class="card-label" style="font-size:16px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0;margin-bottom:8px;">Follow-Up Email</div>
+            <div class="followup-meta" id="followup-meta"></div>
+            <div id="followup-email-area">
+                <div class="followup-loading hidden" id="followup-loading">
+                    <div class="loader"></div>
+                    <span>Generating email…</span>
+                </div>
+                <div class="followup-email-box hidden" id="followup-email-box"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;" id="followup-actions">
+                <button id="btn-copy-email" class="btn-blue" onclick="copyFollowupEmail()" disabled>
+                    <span class="btn-label">📋 Copy</span>
+                    <span class="btn-spinner"></span>
+                </button>
+                <button id="btn-mark-followedup" class="btn-green" onclick="confirmFollowedUp()" disabled>
+                    <span class="btn-label">✓ Mark as Followed Up</span>
+                    <span class="btn-spinner"></span>
+                </button>
+                <button onclick="closeFollowupModal()" class="btn-muted">Close</button>
             </div>
         </div>
     </div>
 
 </div>
 
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
 <script>
-    let allJobs = [];
-    let currentView = 'list';
-    let draggedId = null;
+'use strict';
 
-    function esc(text) {
-        if (!text) return '';
-        const p = document.createElement('p');
-        p.textContent = text;
-        return p.innerHTML;
+// ─── State ───────────────────────────────────────────────────────────────────
+
+let allJobs      = [];
+let currentView  = 'list';
+let draggedId    = null;
+let followupJobId = null; // job currently open in follow-up modal
+
+// ─── XSS escape ──────────────────────────────────────────────────────────────
+
+function esc(text) {
+    if (text == null) return '';
+    const p = document.createElement('p');
+    p.textContent = String(text);
+    return p.innerHTML;
+}
+
+// ─── Toast system ─────────────────────────────────────────────────────────────
+
+const TOAST_ICONS = { success: '✅', error: '❌', info: 'ℹ️', warn: '⚠️' };
+
+function toast(message, type = 'info', duration = 3500) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+        <span class="toast-icon">${TOAST_ICONS[type] ?? 'ℹ️'}</span>
+        <span class="toast-msg">${esc(message)}</span>
+    `;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.classList.add('removing');
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+    }, duration);
+}
+
+// ─── Button loading helper ────────────────────────────────────────────────────
+
+function btnLoad(idOrEl, loading) {
+    const btn = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+    if (!btn) return;
+    btn.disabled = loading;
+    btn.classList.toggle('loading', loading);
+}
+
+// ─── Spinner / page loader ────────────────────────────────────────────────────
+
+function showLoading() {
+    document.getElementById('loading-spinner').classList.remove('hidden');
+    document.getElementById('job-list').classList.add('hidden');
+    document.getElementById('kanban-view').classList.add('hidden');
+}
+function hideLoading() {
+    document.getElementById('loading-spinner').classList.add('hidden');
+    if (currentView === 'list') document.getElementById('job-list').classList.remove('hidden');
+    else                        document.getElementById('kanban-view').classList.remove('hidden');
+}
+
+// ─── View toggle ─────────────────────────────────────────────────────────────
+
+function switchView(view) {
+    currentView = view;
+    document.getElementById('btn-list').classList.toggle('active', view === 'list');
+    document.getElementById('btn-kanban').classList.toggle('active', view === 'kanban');
+    document.getElementById('list-filters').style.display = view === 'list' ? 'flex' : 'none';
+    document.getElementById('job-list').classList.toggle('hidden', view !== 'list');
+    document.getElementById('kanban-view').classList.toggle('hidden', view !== 'kanban');
+    view === 'kanban' ? renderKanban() : renderJobs();
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+function validateAuth() {
+    const u = document.getElementById('user').value.trim();
+    const p = document.getElementById('pass').value.trim();
+    let ok = true;
+
+    const uHint = document.getElementById('hint-user');
+    const pHint = document.getElementById('hint-pass');
+    uHint.textContent = '';
+    pHint.textContent = '';
+    document.getElementById('user').classList.remove('field-error');
+    document.getElementById('pass').classList.remove('field-error');
+
+    if (!u) {
+        uHint.textContent = 'Username is required.';
+        document.getElementById('user').classList.add('field-error');
+        ok = false;
+    } else if (u.length < 3) {
+        uHint.textContent = 'At least 3 characters.';
+        document.getElementById('user').classList.add('field-error');
+        ok = false;
     }
-
-    function showLoading() {
-        document.getElementById('loading-spinner').classList.remove('hidden');
-        document.getElementById('job-list').classList.add('hidden');
-        document.getElementById('kanban-view').classList.add('hidden');
+    if (!p) {
+        pHint.textContent = 'Password is required.';
+        document.getElementById('pass').classList.add('field-error');
+        ok = false;
     }
+    return ok;
+}
 
-    function hideLoading() {
-        document.getElementById('loading-spinner').classList.add('hidden');
-        if (currentView === 'list') document.getElementById('job-list').classList.remove('hidden');
-        else document.getElementById('kanban-view').classList.remove('hidden');
-    }
+async function auth(endpoint) {
+    if (!validateAuth()) return;
 
-    /* VIEW TOGGLE */
-    function switchView(view) {
-        currentView = view;
-        document.getElementById('btn-list').classList.toggle('active', view === 'list');
-        document.getElementById('btn-kanban').classList.toggle('active', view === 'kanban');
-        document.getElementById('list-filters').style.display = view === 'list' ? 'flex' : 'none';
-        document.getElementById('job-list').classList.toggle('hidden', view !== 'list');
-        document.getElementById('kanban-view').classList.toggle('hidden', view !== 'kanban');
-        view === 'kanban' ? renderKanban() : renderJobs();
-    }
+    const u    = document.getElementById('user').value.trim();
+    const p    = document.getElementById('pass').value.trim();
+    const btnId = endpoint === '/login' ? 'btn-login' : 'btn-signup';
+    btnLoad(btnId, true);
 
-    /* AUTH */
-    async function auth(endpoint) {
-        const u = document.getElementById('user').value.trim();
-        const p = document.getElementById('pass').value.trim();
-        if (!u || !p) { alert("Please enter both a username and password."); return; }
-        try {
-            const res  = await fetch(endpoint, { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({username: u, password: p}) });
-            const data = await res.json();
-            if (res.ok) {
-                if (endpoint === '/login') {
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('main-app').classList.remove('hidden');
-                    loadJobs();
-                } else {
-                    alert("Account created! You can now log in.");
-                }
+    try {
+        const res  = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ username: u, password: p }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            if (endpoint === '/login') {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                loadJobs();
+                toast('Welcome back!', 'success');
             } else {
-                alert(data.error || "Authentication failed.");
+                toast('Account created! You can now log in.', 'success');
             }
-        } catch { alert("Could not connect to server."); }
-    }
-
-    /* ADD JOB */
-    async function addJob() {
-        const c = document.getElementById('comp');
-        const r = document.getElementById('role');
-        const u = document.getElementById('url');
-        const s = document.getElementById('stat');
-        const n = document.getElementById('note');
-        showLoading();
-        try {
-            const res = await fetch('/add-job', {
-                method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include',
-                body: JSON.stringify({ company_name: c.value, job_title: r.value, job_url: u.value, status: s.value, notes: n.value })
-            });
-            if (res.ok) { c.value = r.value = u.value = n.value = ''; await loadJobs(); }
-        } catch (err) { console.error(err); } finally { hideLoading(); }
-    }
-
-    /* LOAD */
-    async function loadJobs() {
-        showLoading();
-        try {
-            const res  = await fetch('/tasks', { credentials: 'include' });
-            const data = await res.json();
-            if (res.ok) {
-                allJobs = data.tasks || [];
-                currentView === 'list' ? renderJobs() : renderKanban();
-                renderAnalytics(allJobs);
-                await loadReminders();
-            }
-        } catch (err) { console.error(err); } finally { hideLoading(); }
-    }
-
-    /* ANALYTICS */
-    function renderAnalytics(jobs) {
-        const total = jobs.length;
-        const resp  = jobs.filter(j => j.status === "Interviewing" || j.status === "Offer").length;
-        const rate  = total === 0 ? 0 : ((resp / total) * 100).toFixed(1);
-        const ago   = new Date(); ago.setDate(ago.getDate() - 7);
-        const week  = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= ago).length;
-        document.getElementById('stat-total').textContent    = total;
-        document.getElementById('stat-response').textContent = rate + '%';
-        document.getElementById('stat-weekly').textContent   = week;
-    }
-
-    /* LIST VIEW */
-    function renderJobs() {
-        const filter = document.getElementById('filter-stat').value;
-        const sort   = document.getElementById('sort-date').value;
-        const div    = document.getElementById('job-list');
-
-        let jobs = allJobs.filter(j => filter === 'All' || j.status === filter);
-        jobs.sort((a, b) => sort === 'newest'
-            ? new Date(b.date_applied) - new Date(a.date_applied)
-            : new Date(a.date_applied) - new Date(b.date_applied));
-
-        renderAnalytics(allJobs);
-
-        if (jobs.length === 0) {
-            div.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:50px 0;">No applications found.</p>`;
-            return;
+        } else {
+            toast(data.error || 'Authentication failed.', 'error');
         }
-
-        div.innerHTML = jobs.map(j => {
-            const rawUrl  = j.job_url || '';
-            const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '');
-            const link    = safeUrl ? `<a href="${safeUrl}" target="_blank" class="job-card-link">↗ View Job</a>` : '';
-            const date    = j.date_applied ? new Date(j.date_applied).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '—';
-            return `
-            <div class="job-card">
-                <div style="flex:1;min-width:0;">
-                    <div class="job-card-company">${esc(j.company_name)}</div>
-                    <div class="job-card-role">${esc(j.job_title)}</div>
-                    <div class="job-card-meta">
-                        <span class="status-badge badge-${esc(j.status)}">${esc(j.status)}</span>
-                        <span class="job-card-date">${date}</span>
-                        ${link}
-                    </div>
-                    ${j.notes ? `<div class="job-card-notes">${esc(j.notes)}</div>` : ''}
-                    <div id="followup-output-${j.id}" class="followup-output"></div>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn-green" onclick="generateFollowUp(${j.id})">✉ Follow-Up</button>
-                    <button class="btn-blue"  onclick="openEdit(${j.id})">✎ Edit</button>
-                    <button class="btn-red"   onclick="delJob(${j.id})">✕ Delete</button>
-                </div>
-            </div>`;
-        }).join('');
+    } catch {
+        toast('Could not connect to server.', 'error');
+    } finally {
+        btnLoad(btnId, false);
     }
+}
 
-    /* KANBAN VIEW */
-    function renderKanban() {
-        ['Applied','Interviewing','Offer','Rejected'].forEach(status => {
-            const col   = document.getElementById(`cards-${status}`);
-            const count = document.getElementById(`count-${status}`);
-            const jobs  = allJobs.filter(j => j.status === status);
-            count.textContent = jobs.length;
-            col.innerHTML = jobs.length === 0
-                ? `<p class="kanban-empty">Drop cards here</p>`
-                : jobs.map(j => {
-                    const date = j.date_applied ? new Date(j.date_applied).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
-                    return `
-                    <div class="kanban-card" draggable="true"
-                         ondragstart="onDragStart(event,${j.id})"
-                         ondragend="onDragEnd(event)">
-                        <div class="kanban-card-company">${esc(j.company_name)}</div>
-                        <div class="kanban-card-role">${esc(j.job_title)}</div>
-                        <div class="kanban-card-date">${date}</div>
-                    </div>`;
-                }).join('');
+async function logout() {
+    btnLoad('logout-btn', true);
+    try {
+        await fetch('/logout', { method: 'POST', credentials: 'include' });
+    } catch {}
+    document.getElementById('main-app').classList.add('hidden');
+    document.getElementById('auth-section').classList.remove('hidden');
+    document.getElementById('logout-btn').classList.add('hidden');
+    allJobs = [];
+    toast('Signed out.', 'info');
+    btnLoad('logout-btn', false);
+}
+
+// ─── Add Job ──────────────────────────────────────────────────────────────────
+
+function validateJobForm() {
+    const company = document.getElementById('comp').value.trim();
+    const role    = document.getElementById('role').value.trim();
+    const url     = document.getElementById('url').value.trim();
+    let ok = true;
+
+    [document.getElementById('comp'), document.getElementById('role')].forEach(el => el.classList.remove('field-error'));
+
+    if (!company) {
+        document.getElementById('comp').classList.add('field-error');
+        toast('Company name is required.', 'error');
+        ok = false;
+    } else if (!role) {
+        document.getElementById('role').classList.add('field-error');
+        toast('Job title is required.', 'error');
+        ok = false;
+    }
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        document.getElementById('url').classList.add('field-error');
+        toast('Job URL must start with http:// or https://', 'error');
+        ok = false;
+    }
+    return ok;
+}
+
+async function addJob() {
+    if (!validateJobForm()) return;
+    btnLoad('btn-add', true);
+
+    const payload = {
+        company_name: document.getElementById('comp').value.trim(),
+        job_title:    document.getElementById('role').value.trim(),
+        job_url:      document.getElementById('url').value.trim(),
+        status:       document.getElementById('stat').value,
+        notes:        document.getElementById('note').value.trim(),
+    };
+
+    try {
+        const res = await fetch('/add-job', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            ['comp','role','url','note'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('char-count').textContent = '';
+            await loadJobs();
+            toast(`Added ${payload.company_name} — ${payload.job_title}!`, 'success');
+        } else {
+            toast(data.error || 'Failed to add job.', 'error');
+        }
+    } catch {
+        toast('Server error. Please try again.', 'error');
+    } finally {
+        btnLoad('btn-add', false);
+    }
+}
+
+// Character counter for notes
+document.addEventListener('DOMContentLoaded', () => {
+    const note  = document.getElementById('note');
+    const count = document.getElementById('char-count');
+    if (note && count) {
+        note.addEventListener('input', () => {
+            const len = note.value.length;
+            count.textContent = len > 0 ? `${len}/2000` : '';
+            count.style.color = len > 1800 ? 'var(--yellow)' : 'var(--text-subtle)';
         });
     }
 
-    /* DRAG & DROP */
-    function onDragStart(e, id) {
-        draggedId = id;
-        e.target.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-    }
-    function onDragEnd(e) {
-        e.target.classList.remove('dragging');
-        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
-    }
-    function onDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        e.currentTarget.classList.add('drag-over');
-    }
-    function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    // Enter key on auth inputs
+    ['user','pass'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') auth('/login');
+        });
+    });
+});
 
-    async function onDrop(e, newStatus) {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
-        if (!draggedId) return;
-        const job = allJobs.find(j => j.id === draggedId);
-        if (!job || job.status === newStatus) return;
-        job.status = newStatus;   // optimistic update
+// ─── Load Jobs ────────────────────────────────────────────────────────────────
+
+async function loadJobs() {
+    showLoading();
+    try {
+        const res  = await fetch('/tasks', { credentials: 'include' });
+        const data = await res.json();
+        if (res.ok) {
+            allJobs = data.tasks || [];
+            currentView === 'list' ? renderJobs() : renderKanban();
+            renderAnalytics(allJobs);
+            await loadReminders();
+        } else if (res.status === 401) {
+            toast('Session expired. Please log in again.', 'warn');
+        }
+    } catch {
+        toast('Failed to load jobs.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+function renderAnalytics(jobs) {
+    const total = jobs.length;
+    const resp  = jobs.filter(j => j.status === 'Interviewing' || j.status === 'Offer').length;
+    const rate  = total === 0 ? 0 : ((resp / total) * 100).toFixed(1);
+    const ago   = new Date(); ago.setDate(ago.getDate() - 7);
+    const week  = jobs.filter(j => j.date_applied && new Date(j.date_applied) >= ago).length;
+    document.getElementById('stat-total').textContent    = total;
+    document.getElementById('stat-response').textContent = rate + '%';
+    document.getElementById('stat-weekly').textContent   = week;
+}
+
+// ─── List View ────────────────────────────────────────────────────────────────
+
+function renderJobs() {
+    const filter = document.getElementById('filter-stat').value;
+    const sort   = document.getElementById('sort-date').value;
+    const div    = document.getElementById('job-list');
+
+    let jobs = allJobs.filter(j => filter === 'All' || j.status === filter);
+    jobs.sort((a, b) => sort === 'newest'
+        ? new Date(b.date_applied) - new Date(a.date_applied)
+        : new Date(a.date_applied) - new Date(b.date_applied));
+
+    renderAnalytics(allJobs);
+
+    if (jobs.length === 0) {
+        div.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:50px 0;">No applications found.</p>`;
+        return;
+    }
+
+    div.innerHTML = jobs.map(j => {
+        const rawUrl  = j.job_url || '';
+        const safeUrl = rawUrl.startsWith('http') ? rawUrl : (rawUrl ? `https://${rawUrl}` : '');
+        const link    = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="job-card-link">↗ View Job</a>` : '';
+        const date    = j.date_applied ? new Date(j.date_applied).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+        const followedUp = j.followed_up;
+
+        // Follow-up button changes appearance based on state
+        const followupBtn = followedUp
+            ? `<button class="btn-green" onclick="openFollowupModal(${j.id})" title="Already followed up — click to view or send again">✓ Followed Up</button>`
+            : `<button class="btn-yellow" onclick="openFollowupModal(${j.id})">✉ Follow Up?</button>`;
+
+        const followedBadge = followedUp
+            ? `<span class="followed-up-badge">✓ Followed up</span>`
+            : '';
+
+        return `
+        <div class="job-card${followedUp ? ' is-followed-up' : ''}">
+            <div style="flex:1;min-width:0;">
+                <div class="job-card-company">${esc(j.company_name)}</div>
+                <div class="job-card-role">${esc(j.job_title)}</div>
+                <div class="job-card-meta">
+                    <span class="status-badge badge-${esc(j.status)}">${esc(j.status)}</span>
+                    ${followedBadge}
+                    <span class="job-card-date">${date}</span>
+                    ${link}
+                </div>
+                ${j.notes ? `<div class="job-card-notes">${esc(j.notes)}</div>` : ''}
+            </div>
+            <div class="action-buttons">
+                ${followupBtn}
+                <button class="btn-blue"  onclick="openEdit(${j.id})">✎ Edit</button>
+                <button class="btn-red"   onclick="delJob(${j.id})">✕ Delete</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Kanban View ──────────────────────────────────────────────────────────────
+
+function renderKanban() {
+    ['Applied','Interviewing','Offer','Rejected'].forEach(status => {
+        const col   = document.getElementById(`cards-${status}`);
+        const count = document.getElementById(`count-${status}`);
+        const jobs  = allJobs.filter(j => j.status === status);
+        count.textContent = jobs.length;
+        col.innerHTML = jobs.length === 0
+            ? `<p class="kanban-empty">Drop cards here</p>`
+            : jobs.map(j => {
+                const date = j.date_applied
+                    ? new Date(j.date_applied).toLocaleDateString('en-US',{month:'short',day:'numeric'})
+                    : '—';
+                const followedMark = j.followed_up ? `<div class="kanban-card-followedup">✓ Followed up</div>` : '';
+                return `
+                <div class="kanban-card" draggable="true"
+                     ondragstart="onDragStart(event,${j.id})"
+                     ondragend="onDragEnd(event)">
+                    <div class="kanban-card-company">${esc(j.company_name)}</div>
+                    <div class="kanban-card-role">${esc(j.job_title)}</div>
+                    <div class="kanban-card-date">${date}</div>
+                    ${followedMark}
+                </div>`;
+            }).join('');
+    });
+}
+
+// ─── Drag & Drop ──────────────────────────────────────────────────────────────
+
+function onDragStart(e, id) {
+    draggedId = id;
+    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+}
+function onDragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drag-over'); }
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+async function onDrop(e, newStatus) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!draggedId) return;
+    const job = allJobs.find(j => j.id === draggedId);
+    if (!job || job.status === newStatus) return;
+
+    const oldStatus = job.status;
+    job.status = newStatus; // optimistic
+    renderKanban();
+    renderAnalytics(allJobs);
+
+    try {
+        const res = await fetch('/update-job', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: job.id, company_name: job.company_name, job_title: job.job_title, job_url: job.job_url, status: newStatus, notes: job.notes }),
+        });
+        if (res.ok) {
+            toast(`${job.company_name} moved to ${newStatus}.`, 'success');
+        } else {
+            job.status = oldStatus; // rollback
+            renderKanban();
+            toast('Failed to update status.', 'error');
+        }
+    } catch {
+        job.status = oldStatus;
         renderKanban();
-        renderAnalytics(allJobs);
-        try {
-            await fetch('/update-job', {
-                method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include',
-                body: JSON.stringify({ id: job.id, company_name: job.company_name, job_title: job.job_title, job_url: job.job_url, status: newStatus, notes: job.notes })
-            });
-        } catch { await loadJobs(); }  // rollback on failure
-        draggedId = null;
+        toast('Network error.', 'error');
+    }
+    draggedId = null;
+}
+
+// ─── Follow-Up Modal ──────────────────────────────────────────────────────────
+
+async function openFollowupModal(id) {
+    const job = allJobs.find(j => j.id === id);
+    if (!job) return;
+
+    followupJobId = id;
+
+    document.getElementById('followup-meta').innerHTML =
+        `Generating a follow-up email for <strong>${esc(job.company_name)}</strong> — <em>${esc(job.job_title)}</em>`;
+    document.getElementById('followup-email-box').classList.add('hidden');
+    document.getElementById('followup-email-box').textContent = '';
+    document.getElementById('followup-loading').classList.remove('hidden');
+    document.getElementById('btn-copy-email').disabled     = true;
+    document.getElementById('btn-mark-followedup').disabled = true;
+
+    // Show modal immediately, email loads async
+    document.getElementById('followup-modal').classList.remove('hidden');
+
+    // Update "Mark as Followed Up" button text based on current state
+    const markBtn = document.getElementById('btn-mark-followedup');
+    if (job.followed_up) {
+        markBtn.querySelector('.btn-label').textContent = '✕ Unmark Followed Up';
+    } else {
+        markBtn.querySelector('.btn-label').textContent = '✓ Mark as Followed Up';
     }
 
-    /* FOLLOW-UP */
-    async function generateFollowUp(id) {
-        const job = allJobs.find(j => j.id === id);
-        if (!job) return;
-        const el = document.getElementById(`followup-output-${id}`);
-        el.textContent = "Generating email...";
-        el.classList.add('visible');
-        try {
-            const res  = await fetch('/generate-followup', { method: 'POST', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({company: job.company_name, role: job.job_title}) });
+    try {
+        const res  = await fetch('/generate-followup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ company: job.company_name, role: job.job_title }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('followup-loading').classList.add('hidden');
+            const box = document.getElementById('followup-email-box');
+            box.textContent = data.email || 'Could not generate email.';
+            box.classList.remove('hidden');
+            document.getElementById('btn-copy-email').disabled     = false;
+            document.getElementById('btn-mark-followedup').disabled = false;
+        } else {
+            throw new Error(data.error || 'Server error');
+        }
+    } catch (err) {
+        document.getElementById('followup-loading').classList.add('hidden');
+        const box = document.getElementById('followup-email-box');
+        box.textContent = 'Failed to generate email. Please try again.';
+        box.classList.remove('hidden');
+        toast(err.message || 'Could not generate follow-up.', 'error');
+    }
+}
+
+function closeFollowupModal() {
+    document.getElementById('followup-modal').classList.add('hidden');
+    followupJobId = null;
+}
+
+async function copyFollowupEmail() {
+    const text = document.getElementById('followup-email-box').textContent;
+    if (!text) return;
+    try {
+        await navigator.clipboard.writeText(text);
+        toast('Email copied to clipboard!', 'success');
+    } catch {
+        toast('Copy failed — please select and copy manually.', 'warn');
+    }
+}
+
+async function confirmFollowedUp() {
+    if (followupJobId == null) return;
+    btnLoad('btn-mark-followedup', true);
+    try {
+        const res  = await fetch('/toggle-followup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: followupJobId }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            // Update local state
+            const job = allJobs.find(j => j.id === followupJobId);
+            if (job) job.followed_up = data.followed_up;
+
+            const msg = data.followed_up
+                ? `${job?.company_name || 'Job'} marked as followed up ✓`
+                : `Follow-up mark removed for ${job?.company_name || 'job'}.`;
+            toast(msg, data.followed_up ? 'success' : 'info');
+
+            closeFollowupModal();
+            renderJobs();
+            await loadReminders();
+        } else {
+            toast(data.error || 'Failed to update.', 'error');
+        }
+    } catch {
+        toast('Network error.', 'error');
+    } finally {
+        btnLoad('btn-mark-followedup', false);
+    }
+}
+
+// ─── Delete ───────────────────────────────────────────────────────────────────
+
+async function delJob(id) {
+    const job = allJobs.find(j => j.id === id);
+    if (!job) return;
+    if (!confirm(`Remove "${job.company_name} — ${job.job_title}"?`)) return;
+    showLoading();
+    try {
+        const res = await fetch('/remove-job', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id }),
+        });
+        if (res.ok) {
+            await loadJobs();
+            toast('Application removed.', 'info');
+        } else {
             const data = await res.json();
-            el.textContent = data.email || "Could not generate email.";
-        } catch { el.textContent = "Error connecting to server."; }
+            toast(data.error || 'Failed to remove.', 'error');
+        }
+    } catch {
+        toast('Network error.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ─── Edit Modal ───────────────────────────────────────────────────────────────
+
+function openEdit(id) {
+    const job = allJobs.find(j => j.id === id);
+    if (!job) return;
+    document.getElementById('edit-id').value   = job.id;
+    document.getElementById('edit-comp').value = job.company_name || '';
+    document.getElementById('edit-role').value = job.job_title    || '';
+    document.getElementById('edit-url').value  = job.job_url      || '';
+    document.getElementById('edit-stat').value = job.status       || 'Applied';
+    document.getElementById('edit-note').value = job.notes        || '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+async function saveEdit() {
+    const company = document.getElementById('edit-comp').value.trim();
+    const role    = document.getElementById('edit-role').value.trim();
+    const url     = document.getElementById('edit-url').value.trim();
+
+    if (!company) { toast('Company name is required.', 'error'); return; }
+    if (!role)    { toast('Job title is required.', 'error');    return; }
+    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        toast('Job URL must start with http:// or https://', 'error'); return;
     }
 
-    /* DELETE */
-    async function delJob(id) {
-        if (!confirm("Remove this application?")) return;
-        showLoading();
-        try {
-            const res = await fetch('/remove-job', { method: 'DELETE', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify({id}) });
-            if (res.ok) await loadJobs();
-        } finally { hideLoading(); }
-    }
-
-    /* EDIT MODAL */
-    function openEdit(id) {
-        const job = allJobs.find(j => j.id === id);
-        if (!job) return;
-        document.getElementById('edit-id').value   = job.id;
-        document.getElementById('edit-comp').value = job.company_name;
-        document.getElementById('edit-role').value = job.job_title;
-        document.getElementById('edit-url').value  = job.job_url;
-        document.getElementById('edit-stat').value = job.status;
-        document.getElementById('edit-note').value = job.notes;
-        document.getElementById('edit-modal').classList.remove('hidden');
-    }
-    function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
-
-    async function saveEdit() {
-        const d = {
-            id: document.getElementById('edit-id').value,
-            company_name: document.getElementById('edit-comp').value,
-            job_title:    document.getElementById('edit-role').value,
-            job_url:      document.getElementById('edit-url').value,
-            status:       document.getElementById('edit-stat').value,
-            notes:        document.getElementById('edit-note').value
-        };
-        showLoading();
-        try {
-            const res = await fetch('/update-job', { method: 'PUT', headers: {'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(d) });
-            if (res.ok) { closeEdit(); await loadJobs(); }
-            else alert("Failed to update.");
-        } finally { hideLoading(); }
-    }
-
-    /* REMINDERS */
-    async function loadReminders() {
-        try {
-            const res  = await fetch('/reminders', { credentials: 'include' });
+    btnLoad('btn-save-edit', true);
+    try {
+        const res = await fetch('/update-job', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                id:           parseInt(document.getElementById('edit-id').value, 10),
+                company_name: company,
+                job_title:    role,
+                job_url:      url,
+                status:       document.getElementById('edit-stat').value,
+                notes:        document.getElementById('edit-note').value.trim(),
+            }),
+        });
+        if (res.ok) {
+            closeEdit();
+            await loadJobs();
+            toast('Application updated.', 'success');
+        } else {
             const data = await res.json();
-            const sec  = document.getElementById('reminder-section');
-            const list = document.getElementById('reminder-items');
-            if (res.ok && data.reminders?.length > 0) {
-                sec.classList.remove('hidden');
-                list.innerHTML = data.reminders.map(r => `<li>It's been a week since you applied to <strong>${esc(r.company_name)}</strong> for <em>${esc(r.job_title)}</em>. Consider following up.</li>`).join('');
-            } else {
-                sec.classList.add('hidden');
-            }
-        } catch (err) { console.error(err); }
+            toast(data.error || 'Failed to update.', 'error');
+        }
+    } catch {
+        toast('Network error.', 'error');
+    } finally {
+        btnLoad('btn-save-edit', false);
     }
+}
+
+// Close modals on overlay click
+document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal')) closeEdit();
+});
+document.getElementById('followup-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('followup-modal')) closeFollowupModal();
+});
+
+// ─── Reminders ────────────────────────────────────────────────────────────────
+
+async function loadReminders() {
+    try {
+        const res  = await fetch('/reminders', { credentials: 'include' });
+        const data = await res.json();
+        const sec  = document.getElementById('reminder-section');
+        const list = document.getElementById('reminder-items');
+        if (res.ok && data.reminders?.length > 0) {
+            sec.classList.remove('hidden');
+            list.innerHTML = data.reminders.map(r =>
+                `<li>It's been over a week since you applied to <strong>${esc(r.company_name)}</strong> for <em>${esc(r.job_title)}</em> — consider following up!</li>`
+            ).join('');
+        } else {
+            sec.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error('Reminders error:', err);
+    }
+}
 </script>
 </body>
 </html>
